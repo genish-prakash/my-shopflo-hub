@@ -75,10 +75,10 @@ const ProductsView = () => {
   };
 
   return (
-    <div className="pb-24 px-4 pt-4">
+    <div className="pb-24 px-4 pt-4" style={{ background: 'linear-gradient(180deg, rgba(101, 53, 255, 0.08) 0%, transparent 30%)' }}>
       {/* Header */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground">Products</h1>
+        <h1 className="text-xl font-semibold text-foreground">Products</h1>
       </div>
 
       {/* Tabs */}
