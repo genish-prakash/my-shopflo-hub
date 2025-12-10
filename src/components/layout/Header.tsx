@@ -29,7 +29,10 @@ const Header = ({ onViewChange }: HeaderProps) => {
         {/* Right Side - Notifications & Profile */}
         <div className="flex items-center gap-3">
           {/* Notifications */}
-          <button className="relative p-2 rounded-full hover:bg-muted transition-colors">
+          <button 
+            onClick={() => navigate('/notifications')}
+            className="relative p-2 rounded-full hover:bg-muted transition-colors"
+          >
             <Bell className="h-5 w-5 text-foreground" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
           </button>
