@@ -20,23 +20,22 @@ const SORT_OPTIONS = [
 
 const mockProducts = {
   viewed: [
-    { id: "9", name: "Gaming Mouse", brand: "Logitech", price: 4999, image: "🖱️", viewedDate: "2024-01-20", category: "Electronics", isWishlisted: false },
-    { id: "10", name: "Yoga Mat", brand: "Decathlon", price: 1999, image: "🧘", viewedDate: "2024-01-19", category: "Sports", isWishlisted: false },
-    { id: "11", name: "Bluetooth Speaker", brand: "JBL", price: 7499, image: "🔊", viewedDate: "2024-01-18", category: "Electronics", isWishlisted: true },
-    { id: "12", name: "Sunglasses", brand: "Ray-Ban", price: 8999, image: "🕶️", viewedDate: "2024-01-17", category: "Fashion", isWishlisted: false },
-    { id: "13", name: "Water Bottle", brand: "Milton", price: 799, image: "🥤", viewedDate: "2024-01-16", category: "Accessories", isWishlisted: false },
+    { id: "9", name: "Gaming Mouse", brand: "Logitech", price: 4999, image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop", viewedDate: "2024-01-20", isWishlisted: false },
+    { id: "10", name: "Yoga Mat", brand: "Decathlon", price: 1999, image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300&h=300&fit=crop", viewedDate: "2024-01-19", isWishlisted: false },
+    { id: "11", name: "Bluetooth Speaker", brand: "JBL", price: 7499, image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300&h=300&fit=crop", viewedDate: "2024-01-18", isWishlisted: true },
+    { id: "12", name: "Sunglasses", brand: "Ray-Ban", price: 8999, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=300&fit=crop", viewedDate: "2024-01-17", isWishlisted: false },
   ],
   wishlisted: [
-    { id: "1", name: "Wireless Headphones", brand: "Sony", price: 8999, image: "🎧", addedDate: "2024-01-10", category: "Electronics" },
-    { id: "2", name: "Smart Watch", brand: "Samsung", price: 15999, image: "⌚", addedDate: "2024-01-12", category: "Electronics" },
-    { id: "3", name: "Running Shoes", brand: "Adidas", price: 6499, image: "👟", addedDate: "2024-01-08", category: "Fashion" },
-    { id: "4", name: "Laptop Backpack", brand: "Dell", price: 2999, image: "🎒", addedDate: "2024-01-15", category: "Accessories" },
+    { id: "1", name: "Wireless Headphones", brand: "Sony", price: 8999, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop", addedDate: "2024-01-10" },
+    { id: "2", name: "Smart Watch", brand: "Samsung", price: 15999, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop", addedDate: "2024-01-12" },
+    { id: "3", name: "Running Shoes", brand: "Adidas", price: 6499, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop", addedDate: "2024-01-08" },
+    { id: "4", name: "Laptop Backpack", brand: "Dell", price: 2999, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop", addedDate: "2024-01-15" },
   ],
   purchased: [
-    { id: "5", name: "Air Max 270 React", brand: "Nike", price: 12999, image: "👟", purchasedDate: "2024-01-05", category: "Fashion" },
-    { id: "6", name: "AirPods Pro", brand: "Apple", price: 24900, image: "🎧", purchasedDate: "2023-12-20", category: "Electronics" },
-    { id: "7", name: "Cotton Shirt", brand: "Zara", price: 2499, image: "👔", purchasedDate: "2024-01-18", category: "Fashion" },
-    { id: "8", name: "Leather Wallet", brand: "Fossil", price: 3999, image: "👛", purchasedDate: "2024-01-10", category: "Accessories" },
+    { id: "5", name: "Air Max 270 React", brand: "Nike", price: 12999, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop", purchasedDate: "2024-01-05" },
+    { id: "6", name: "AirPods Pro", brand: "Apple", price: 24900, image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=300&h=300&fit=crop", purchasedDate: "2023-12-20" },
+    { id: "7", name: "Cotton Shirt", brand: "Zara", price: 2499, image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=300&fit=crop", purchasedDate: "2024-01-18" },
+    { id: "8", name: "Leather Wallet", brand: "Fossil", price: 3999, image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=300&h=300&fit=crop", purchasedDate: "2024-01-10" },
   ],
 };
 
@@ -99,40 +98,42 @@ const ProductsView = () => {
   ];
 
   return (
-    <div className="px-4 pt-6 pb-24">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Products</h1>
-        <p className="text-sm text-muted-foreground">Your product activity</p>
+    <div className="pb-24">
+      {/* Header */}
+      <div className="bg-card px-4 py-4 mb-2">
+        <h1 className="text-xl font-bold text-foreground">Products</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                activeTab === tab.id ? "bg-background/20" : "bg-foreground/10"
-              }`}>
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
+      <div className="bg-card px-4 py-3 mb-2">
+        <div className="flex gap-2 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  activeTab === tab.id ? "bg-background/20" : "bg-foreground/10"
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Sort */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="bg-card px-4 py-3 mb-2 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{sortedProducts.length} products</p>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -157,75 +158,78 @@ const ProductsView = () => {
       </div>
 
       {/* Products Grid */}
-      {sortedProducts.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          No products found
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {sortedProducts.map((product: any) => (
-            <div
-              key={product.id}
-              className="relative bg-card rounded-2xl overflow-hidden shadow-sm"
-            >
-              {/* Price - Top Left */}
-              <div className="absolute top-3 left-3 z-10">
-                <span className="text-sm font-bold text-foreground bg-background/90 backdrop-blur-sm px-2 py-1 rounded-lg">
-                  ₹{product.price.toLocaleString()}
-                </span>
-              </div>
-
-              {/* Product Image */}
-              <div className="aspect-square bg-secondary flex items-center justify-center text-6xl">
-                {product.image}
-              </div>
-
-              {/* Product Info */}
-              <div className="p-3 space-y-1">
-                <p className="text-xs text-muted-foreground">{product.brand}</p>
-                <h3 className="font-medium text-sm text-foreground truncate pr-8">
-                  {product.name}
-                </h3>
-              </div>
-
-              {/* Wishlist - Bottom Right */}
-              {activeTab === "viewed" && (
-                <button
-                  onClick={() => toggleWishlistViewed(product.id)}
-                  className="absolute bottom-3 right-3 p-1"
-                >
-                  <Heart
-                    className={`w-5 h-5 transition-all ${
-                      product.isWishlisted
-                        ? "fill-red-500 text-red-500"
-                        : "text-muted-foreground hover:text-red-400"
-                    }`}
+      <div className="bg-card">
+        {sortedProducts.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            No products found
+          </div>
+        ) : (
+          <div className="grid grid-cols-2">
+            {sortedProducts.map((product: any, index) => (
+              <div
+                key={product.id}
+                className={`relative ${
+                  index % 2 === 0 ? "border-r border-border" : ""
+                } ${index < sortedProducts.length - 2 ? "border-b border-border" : ""}`}
+              >
+                {/* Product Image */}
+                <div className="aspect-square bg-secondary">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-full object-cover"
                   />
-                </button>
-              )}
+                </div>
 
-              {activeTab === "wishlisted" && (
-                <button
-                  onClick={() => removeFromWishlist(product.id)}
-                  className="absolute bottom-3 right-3 p-1"
-                >
-                  <Heart className="w-5 h-5 fill-red-500 text-red-500" />
-                </button>
-              )}
+                {/* Product Info */}
+                <div className="p-3">
+                  <p className="text-xs text-muted-foreground mb-1">{product.brand}</p>
+                  <h3 className="font-medium text-sm text-foreground truncate mb-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm font-bold text-foreground">
+                    ₹{product.price.toLocaleString()}
+                  </p>
+                </div>
 
-              {activeTab === "purchased" && (
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="absolute bottom-3 right-3 h-7 text-xs rounded-full"
-                >
-                  Reorder
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                {/* Action Buttons */}
+                {activeTab === "viewed" && (
+                  <button
+                    onClick={() => toggleWishlistViewed(product.id)}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center"
+                  >
+                    <Heart
+                      className={`w-4 h-4 transition-all ${
+                        product.isWishlisted
+                          ? "fill-red-500 text-red-500"
+                          : "text-foreground"
+                      }`}
+                    />
+                  </button>
+                )}
+
+                {activeTab === "wishlisted" && (
+                  <button
+                    onClick={() => removeFromWishlist(product.id)}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center"
+                  >
+                    <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                  </button>
+                )}
+
+                {activeTab === "purchased" && (
+                  <Button 
+                    size="sm" 
+                    className="absolute top-3 right-3 h-7 text-xs rounded-full bg-background/80 backdrop-blur-sm text-foreground hover:bg-background"
+                  >
+                    Reorder
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
