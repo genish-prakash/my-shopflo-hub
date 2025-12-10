@@ -1,5 +1,5 @@
+import { User, Mail, Phone, Edit2, LogOut, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { User, Mail, Phone, MapPin, Calendar, Award, Edit2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,16 +14,7 @@ const ProfileView = () => {
     name: "Rahul Kumar",
     email: "rahul.kumar@email.com",
     phone: "+91 98765 43210",
-    gender: "",
-    dateOfBirth: "",
-    city: "",
-    placeOfBirth: "",
   });
-
-  const profileCompletion = () => {
-    const fields = Object.values(profile).filter((val) => val !== "");
-    return Math.round((fields.length / Object.keys(profile).length) * 100);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -42,17 +33,15 @@ const ProfileView = () => {
     });
   };
 
-  const completion = profileCompletion();
-
   return (
     <div className="px-4 pt-6 pb-4">
+      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-1">My Profile</h1>
-          <p className="text-muted-foreground">Manage your personal information</p>
+          <h1 className="text-2xl font-bold text-foreground">Profile</h1>
         </div>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           onClick={() => setIsEditing(!isEditing)}
         >
@@ -60,41 +49,25 @@ const ProfileView = () => {
         </Button>
       </div>
 
-      {/* Profile Completion Card */}
-      <div className="bg-gradient-primary rounded-xl p-6 mb-6 shadow-card text-primary-foreground">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-12 w-12 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-            <Award className="h-6 w-6" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">Profile Completion</h3>
-            <p className="text-sm opacity-90">Earn 500 points by completing</p>
-          </div>
+      {/* Profile Avatar */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+          <User className="h-10 w-10 text-primary" />
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span>{completion}% Complete</span>
-            <span className="font-bold">{completion === 100 ? "🎉 Done!" : "Keep going!"}</span>
-          </div>
-          <div className="h-3 bg-primary-foreground/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary-foreground transition-smooth"
-              style={{ width: `${completion}%` }}
-            />
-          </div>
-        </div>
+        <h2 className="text-xl font-semibold text-foreground">{profile.name}</h2>
+        <p className="text-sm text-muted-foreground">{profile.email}</p>
       </div>
 
-      {/* Profile Information */}
-      <div className="bg-card rounded-xl shadow-card p-6 space-y-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">
+      {/* Personal Information */}
+      <div className="bg-card rounded-xl shadow-sm border border-border p-4 space-y-4 mb-6">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
           Personal Information
-        </h2>
+        </h3>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" />
+            <Label htmlFor="name" className="flex items-center gap-2 text-xs text-muted-foreground">
+              <User className="h-3 w-3" />
               Full Name
             </Label>
             <Input
@@ -102,12 +75,13 @@ const ProfileView = () => {
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
               disabled={!isEditing}
+              className="bg-background"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-primary" />
+            <Label htmlFor="email" className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Mail className="h-3 w-3" />
               Email Address
             </Label>
             <Input
@@ -116,12 +90,13 @@ const ProfileView = () => {
               value={profile.email}
               onChange={(e) => setProfile({ ...profile, email: e.target.value })}
               disabled={!isEditing}
+              className="bg-background"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-primary" />
+            <Label htmlFor="phone" className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Phone className="h-3 w-3" />
               Phone Number
             </Label>
             <Input
@@ -129,82 +104,37 @@ const ProfileView = () => {
               value={profile.phone}
               onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
               disabled={!isEditing}
+              className="bg-background"
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Input
-                id="gender"
-                placeholder="Enter gender"
-                value={profile.gender}
-                onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dob" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                Date of Birth
-              </Label>
-              <Input
-                id="dob"
-                type="date"
-                value={profile.dateOfBirth}
-                onChange={(e) =>
-                  setProfile({ ...profile, dateOfBirth: e.target.value })
-                }
-                disabled={!isEditing}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                City
-              </Label>
-              <Input
-                id="city"
-                placeholder="Current city"
-                value={profile.city}
-                onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="birthPlace">Place of Birth</Label>
-              <Input
-                id="birthPlace"
-                placeholder="Birth place"
-                value={profile.placeOfBirth}
-                onChange={(e) =>
-                  setProfile({ ...profile, placeOfBirth: e.target.value })
-                }
-                disabled={!isEditing}
-              />
-            </div>
           </div>
         </div>
 
         {isEditing && (
           <Button
             onClick={handleSave}
-            className="w-full bg-gradient-primary hover:opacity-90"
+            className="w-full bg-primary hover:bg-primary/90"
           >
             Save Changes
           </Button>
         )}
       </div>
 
+      {/* Shopping Preferences Link */}
+      <div
+        onClick={() => navigate("/shopping-preferences")}
+        className="bg-card rounded-xl shadow-sm border border-border p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors mb-6"
+      >
+        <div>
+          <h3 className="font-medium text-foreground">Shopping Preferences</h3>
+          <p className="text-sm text-muted-foreground">Manage your preferences</p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </div>
+
       {/* Logout Button */}
       <Button
         variant="outline"
-        className="w-full mt-6"
+        className="w-full border-destructive text-destructive hover:bg-destructive/10"
         onClick={handleLogout}
       >
         <LogOut className="h-4 w-4 mr-2" />

@@ -10,6 +10,7 @@ import ExploreBrands from "./pages/ExploreBrands";
 import MyStats from "./pages/MyStats";
 import ShoppingPreferences from "./pages/ShoppingPreferences";
 import BrandDetail from "./pages/BrandDetail";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 // Protected Route Component
@@ -73,6 +74,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <BrandDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             }
           />
