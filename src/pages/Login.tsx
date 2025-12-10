@@ -4,28 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import wanderLogo from "@/assets/wander-logo.png";
-import { ArrowLeft, ArrowRight, ShoppingBag, Sparkles, Shirt, Wine, Heart, Watch, Headphones, Dumbbell, Gift, Percent, Star, Package } from "lucide-react";
+import tshirtImg from "@/assets/tshirt_wander.png";
+import shoesImg from "@/assets/shoes_wander.png";
+import sareeImg from "@/assets/saree_wander.png";
+import proteinImg from "@/assets/protein_wander.png";
+import necklaceImg from "@/assets/necklace_wander.png";
+import lipstickImg from "@/assets/lipstick_wander.png";
+import joggerImg from "@/assets/jogger_wander.png";
+import { ArrowLeft, ArrowRight, Package, Percent } from "lucide-react";
 
 const ROTATING_TEXTS = [
-  "Stay updated on your online orders at every step.",
-  "Discover your next favourite Indian brand.",
-  "Discover which brands are currently running a sale.",
-  "Follow all your favourite brands at one place.",
+  "Stay updated on your online orders at every step",
+  "Discover your next favourite Indian brand",
+  "Discover which brands are currently running a sale",
+  "Follow all your favourite brands at one place",
 ];
 
 const FLOATING_PRODUCTS = [
-  { icon: ShoppingBag, color: "#FF6B6B", delay: 0, top: 8 },
-  { icon: Sparkles, color: "#4ECDC4", delay: 3, top: 25 },
-  { icon: Shirt, color: "#45B7D1", delay: 6, top: 45 },
-  { icon: Wine, color: "#96CEB4", delay: 9, top: 65 },
-  { icon: Heart, color: "#FF69B4", delay: 1.5, top: 15 },
-  { icon: Watch, color: "#FFD93D", delay: 4.5, top: 35 },
-  { icon: Headphones, color: "#6C5CE7", delay: 7.5, top: 55 },
-  { icon: Dumbbell, color: "#A8E6CF", delay: 10.5, top: 75 },
-  { icon: Gift, color: "#FF8A5B", delay: 2, top: 85 },
-  { icon: Percent, color: "#5B8DEE", delay: 5, top: 12 },
-  { icon: Star, color: "#FFB800", delay: 8, top: 40 },
-  { icon: Package, color: "#B794F4", delay: 11, top: 70 },
+  { img: tshirtImg, top: 8, left: 5, delay: 0 },
+  { img: shoesImg, top: 28, right: 8, delay: 0.5 },
+  { img: sareeImg, top: 48, left: 3, delay: 1 },
+  { img: proteinImg, top: 68, right: 5, delay: 1.5 },
+  { img: necklaceImg, top: 15, right: 2, delay: 0.3 },
+  { img: lipstickImg, top: 55, right: 10, delay: 0.8 },
+  { img: joggerImg, top: 78, left: 8, delay: 1.2 },
 ];
 
 const Login = () => {
@@ -103,6 +105,20 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-background to-purple-50 flex flex-col relative overflow-hidden">
+      {/* Light Grid Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div 
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(270 50% 80% / 0.4) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(270 50% 80% / 0.4) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px'
+          }}
+        />
+      </div>
+
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-purple-200/40 to-pink-200/40 rounded-full blur-3xl" />
@@ -125,40 +141,30 @@ const Login = () => {
       {/* Welcome Screen */}
       {step === "welcome" && (
         <div className="flex-1 flex flex-col items-center justify-center px-6 animate-fade-in relative">
-          {/* Floating Product Bubbles */}
+          {/* Floating Product Images */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {FLOATING_PRODUCTS.map((product, index) => {
-              const IconComponent = product.icon;
-              return (
-                <div
-                  key={index}
-                  className="absolute animate-float-bubble"
-                  style={{
-                    top: `${product.top}%`,
-                    left: '-80px',
-                    animationDelay: `${product.delay}s`,
-                    animationDuration: '16s',
-                  }}
-                >
-                  <div 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-gentle backdrop-blur-sm"
-                    style={{ 
-                      backgroundColor: `${product.color}25`,
-                      border: `1.5px solid ${product.color}50`,
-                    }}
-                  >
-                    <IconComponent 
-                      className="w-5 h-5" 
-                      style={{ color: product.color }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            {FLOATING_PRODUCTS.map((product, index) => (
+              <div
+                key={index}
+                className="absolute animate-float-vertical"
+                style={{
+                  top: `${product.top}%`,
+                  ...(product.left !== undefined ? { left: `${product.left}%` } : {}),
+                  ...(product.right !== undefined ? { right: `${product.right}%` } : {}),
+                  animationDelay: `${product.delay}s`,
+                }}
+              >
+                <img 
+                  src={product.img} 
+                  alt="" 
+                  className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg"
+                />
+              </div>
+            ))}
           </div>
 
           {/* Logo */}
-          <div className="mb-6 z-10">
+          <div className="mb-4 z-10">
             <img
               src={wanderLogo}
               alt="Wander"
@@ -166,8 +172,15 @@ const Login = () => {
             />
           </div>
 
-          {/* App Name */}
-          <h1 className="text-2xl font-bold text-foreground mb-8 z-10">Wander</h1>
+          {/* App Name with Shimmer */}
+          <div className="text-center mb-8 z-10">
+            <h1 className="text-3xl font-bold shimmer-text font-roboto mb-1">
+              Wander
+            </h1>
+            <p className="text-sm text-muted-foreground font-medium">
+              from Shopflo
+            </p>
+          </div>
 
           {/* Rotating Text with Shimmer */}
           <div className="h-24 flex items-center justify-center text-center px-4 mb-10 z-10">
@@ -226,7 +239,8 @@ const Login = () => {
                   className="h-10 w-10 object-contain rounded-xl"
                 />
                 <div>
-                  <h2 className="font-semibold text-foreground">Wander</h2>
+                  <h2 className="font-semibold text-foreground font-roboto">Wander</h2>
+                  <p className="text-xs text-muted-foreground">from Shopflo</p>
                 </div>
               </div>
               

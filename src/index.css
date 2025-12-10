@@ -238,6 +238,20 @@ All colors MUST be HSL.
   }
 }
 
+/* Vertical float animation for login page products */
+@keyframes float-vertical {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-float-vertical {
+  animation: float-vertical 3s ease-in-out infinite;
+}
+
 /* Float bubble animation for login page */
 @keyframes float-bubble {
   0% {
@@ -271,4 +285,9 @@ All colors MUST be HSL.
 
 .animate-bounce-gentle {
   animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+/* Roboto font for Wander branding */
+.font-roboto {
+  font-family: 'Roboto', system-ui, sans-serif;
 }
