@@ -1,6 +1,7 @@
-import { User, ChevronRight, LogOut, Settings, HelpCircle, FileText, Shield } from "lucide-react";
+import { LogOut, Phone, Mail, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const ProfileView = () => {
   const navigate = useNavigate();
@@ -15,89 +16,63 @@ const ProfileView = () => {
     });
   };
 
-  const menuItems = [
-    {
-      label: "Shopping Preferences",
-      description: "Manage your preferences",
-      icon: Settings,
-      onClick: () => navigate("/shopping-preferences"),
-    },
-    {
-      label: "Help Center",
-      description: "FAQs and support",
-      icon: HelpCircle,
-      onClick: () => toast({ title: "Coming soon", description: "Help center is under development" }),
-    },
-    {
-      label: "Terms & Conditions",
-      description: "Read our terms",
-      icon: FileText,
-      onClick: () => toast({ title: "Coming soon", description: "Terms page is under development" }),
-    },
-    {
-      label: "Privacy Policy",
-      description: "How we use your data",
-      icon: Shield,
-      onClick: () => toast({ title: "Coming soon", description: "Privacy page is under development" }),
-    },
-  ];
-
   return (
-    <div className="pb-24">
+    <div className="pb-24 bg-muted/30 min-h-screen">
       {/* Profile Header */}
-      <div className="bg-card px-4 py-6 mb-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="h-8 w-8 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-foreground">Rahul Kumar</h1>
-            <p className="text-sm text-muted-foreground">rahul.kumar@email.com</p>
-            <p className="text-sm text-muted-foreground">+91 98765 43210</p>
-          </div>
+      <div className="bg-card px-4 py-8">
+        <div className="flex flex-col items-center text-center">
+          <Avatar className="w-20 h-20 mb-4">
+            <AvatarFallback className="bg-neutral-200 text-neutral-600 text-2xl font-semibold">
+              <User className="w-10 h-10" />
+            </AvatarFallback>
+          </Avatar>
+          <h1 className="text-xl font-bold text-foreground mb-1">Rahul Kumar</h1>
         </div>
       </div>
 
-      {/* Menu Items */}
-      <div className="bg-card">
-        {menuItems.map((item, index) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={item.label}
-              onClick={item.onClick}
-              className={`flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-muted/50 transition-colors ${
-                index !== menuItems.length - 1 ? "border-b border-border" : ""
-              }`}
-            >
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                <Icon className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-foreground">{item.label}</p>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      {/* Contact Details */}
+      <div className="bg-card mx-4 mt-4 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-border">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Contact Details</p>
+        </div>
+        
+        <div className="divide-y divide-border">
+          <div className="flex items-center gap-4 px-4 py-4">
+            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+              <Mail className="h-5 w-5 text-neutral-500" />
             </div>
-          );
-        })}
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+              <p className="text-sm font-medium text-foreground">rahul.kumar@email.com</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 px-4 py-4">
+            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+              <Phone className="h-5 w-5 text-neutral-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+              <p className="text-sm font-medium text-foreground">+91 98765 43210</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Logout */}
-      <div className="bg-card mt-4">
-        <div
+      <div className="bg-card mx-4 mt-4 rounded-2xl overflow-hidden">
+        <button
           onClick={handleLogout}
-          className="flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-muted/50 transition-colors"
+          className="w-full flex items-center gap-4 px-4 py-4 hover:bg-muted/50 transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-            <LogOut className="h-5 w-5 text-destructive" />
+          <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+            <LogOut className="h-5 w-5 text-red-500" />
           </div>
-          <div className="flex-1">
-            <p className="font-medium text-destructive">Logout</p>
-            <p className="text-sm text-muted-foreground">Sign out of your account</p>
+          <div className="flex-1 text-left">
+            <p className="font-medium text-red-500">Logout</p>
+            <p className="text-xs text-muted-foreground">Sign out of your account</p>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-        </div>
+        </button>
       </div>
 
       {/* App Version */}
