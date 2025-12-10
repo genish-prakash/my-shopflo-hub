@@ -3,6 +3,7 @@ import { Heart, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { mockBrands, Brand, Product } from "@/data/brands";
+import ProductDetailSheet from "@/components/ProductDetailSheet";
 
 type FilterType = "all" | "following" | "wishlisted";
 
@@ -10,6 +11,7 @@ const BrandsView = () => {
   const navigate = useNavigate();
   const [brands, setBrands] = useState<Brand[]>(mockBrands);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const toggleFollow = (e: React.MouseEvent, brandId: string) => {
     e.stopPropagation();
@@ -58,6 +60,30 @@ const BrandsView = () => {
     navigate(`/brand/${brandId}`);
   };
 
+  const openProductDetail = (brand: Brand, product: Product) => {
+    setSelectedProduct({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      images: [product.image, product.image, product.image],
+      brand: {
+        name: brand.name,
+        logo: brand.logo,
+        color: brand.color,
+        website: `https://${brand.name.toLowerCase().replace(/\s+/g, '')}.com`,
+      },
+      description: `Premium ${product.name.toLowerCase()} from ${brand.name}. High quality materials and excellent craftsmanship.`,
+      variants: [
+        { id: "s", name: "S", available: true },
+        { id: "m", name: "M", available: true },
+        { id: "l", name: "L", available: false },
+        { id: "xl", name: "XL", available: true },
+      ],
+      isWishlisted: product.isWishlisted,
+    });
+  };
+
   return (
     <div className="px-4 pt-6 pb-24">
       <div className="mb-6">
@@ -98,7 +124,8 @@ const BrandsView = () => {
               {(filteredContent as { brand: Brand; product: Product }[]).map(({ brand, product }) => (
                 <div
                   key={product.id}
-                  className="relative bg-card rounded-2xl p-3 shadow-sm"
+                  onClick={() => openProductDetail(brand, product)}
+                  className="relative bg-card rounded-2xl p-3 shadow-sm cursor-pointer transition-transform hover:scale-[1.02]"
                   style={{
                     background: `linear-gradient(135deg, ${brand.color}10 0%, ${brand.color}05 100%)`,
                   }}
@@ -111,7 +138,10 @@ const BrandsView = () => {
                   </div>
                   <p className="text-[10px] text-muted-foreground/70">{brand.name}</p>
                   <button
-                    onClick={(e) => toggleWishlist(e, brand.id, product.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWishlist(e, brand.id, product.id);
+                    }}
                     className="absolute bottom-3 right-3 p-1"
                   >
                     <Heart className="w-5 h-5 fill-red-500 text-red-500" />
@@ -142,38 +172,36 @@ const BrandsView = () => {
               >
                 {/* Header with Logo and Follow */}
                 <div className="flex items-center justify-between p-4">
-                  <h2 className="text-lg font-bold text-foreground">{brand.name}</h2>
                   <div className="flex items-center gap-3">
-                    <Button
-                      variant={brand.isFollowed ? "default" : "outline"}
-                      size="sm"
-                      className={`rounded-full px-4 h-8 text-xs font-medium ${
-                        brand.isFollowed
-                          ? "bg-foreground text-background hover:bg-foreground/90"
-                          : "border-foreground/30 hover:bg-foreground/10"
-                      }`}
-                      onClick={(e) => toggleFollow(e, brand.id)}
-                    >
-                      {brand.isFollowed ? (
-                        <>Following</>
-                      ) : (
-                        <>
-                          <Plus className="w-3 h-3 mr-1" />
-                          Follow
-                        </>
-                      )}
-                    </Button>
-                    <div className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={brand.logo} 
-                        alt={brand.name}
-                        className="w-7 h-7 object-contain"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
+                    <img 
+                      src={brand.logo} 
+                      alt={brand.name}
+                      className="w-8 h-8 object-contain rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <h2 className="text-lg font-bold text-foreground">{brand.name}</h2>
                   </div>
+                  <Button
+                    variant={brand.isFollowed ? "default" : "outline"}
+                    size="sm"
+                    className={`rounded-full px-4 h-8 text-xs font-medium ${
+                      brand.isFollowed
+                        ? "bg-foreground text-background hover:bg-foreground/90"
+                        : "border-foreground/30 hover:bg-foreground/10"
+                    }`}
+                    onClick={(e) => toggleFollow(e, brand.id)}
+                  >
+                    {brand.isFollowed ? (
+                      <>Following</>
+                    ) : (
+                      <>
+                        <Plus className="w-3 h-3 mr-1" />
+                        Follow
+                      </>
+                    )}
+                  </Button>
                 </div>
 
                 {/* Products Grid - 2x2 - No product names */}
@@ -183,7 +211,10 @@ const BrandsView = () => {
                       <div
                         key={product.id}
                         className="relative bg-white/90 backdrop-blur-sm rounded-xl p-3 aspect-square flex flex-col"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openProductDetail(brand, product);
+                        }}
                       >
                         {/* Price - Top Left */}
                         <div className="flex items-center gap-1">
@@ -242,6 +273,23 @@ const BrandsView = () => {
           )}
         </div>
       )}
+
+      {/* Product Detail Sheet */}
+      <ProductDetailSheet
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        product={selectedProduct}
+        onToggleWishlist={(id) => {
+          // Find and toggle the product
+          brands.forEach(brand => {
+            const product = brand.products.find(p => p.id === id);
+            if (product) {
+              toggleWishlist({ stopPropagation: () => {} } as React.MouseEvent, brand.id, id);
+            }
+          });
+          setSelectedProduct(null);
+        }}
+      />
     </div>
   );
 };

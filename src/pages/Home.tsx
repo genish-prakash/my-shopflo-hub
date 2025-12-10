@@ -4,15 +4,14 @@ import BottomNav from "@/components/layout/BottomNav";
 import OrdersView from "@/components/views/OrdersView";
 import ProductsView from "@/components/views/ProductsView";
 import BrandsView from "@/components/views/BrandsView";
-import RewardsView from "@/components/views/RewardsView";
 import OffersView from "@/components/views/OffersView";
 import ProfileView from "@/components/views/ProfileView";
 import AddressesView from "@/components/views/AddressesView";
 
-export type ViewType = "orders" | "products" | "brands" | "rewards" | "offers" | "profile" | "addresses";
+export type ViewType = "orders" | "products" | "brands" | "offers" | "profile" | "addresses";
 
 const Home = () => {
-  const [currentView, setCurrentView] = useState<ViewType>("orders");
+  const [currentView, setCurrentView] = useState<ViewType>("brands");
 
   const renderView = () => {
     switch (currentView) {
@@ -22,8 +21,6 @@ const Home = () => {
         return <ProductsView />;
       case "brands":
         return <BrandsView />;
-      case "rewards":
-        return <RewardsView />;
       case "offers":
         return <OffersView />;
       case "profile":
@@ -31,7 +28,7 @@ const Home = () => {
       case "addresses":
         return <AddressesView />;
       default:
-        return <OrdersView />;
+        return <BrandsView />;
     }
   };
 

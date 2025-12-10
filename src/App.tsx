@@ -7,7 +7,6 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import OrderTracking from "./pages/OrderTracking";
 import ExploreBrands from "./pages/ExploreBrands";
-import MyStats from "./pages/MyStats";
 import ShoppingPreferences from "./pages/ShoppingPreferences";
 import BrandDetail from "./pages/BrandDetail";
 import Notifications from "./pages/Notifications";
@@ -50,14 +49,6 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ExploreBrands />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my-stats"
-            element={
-              <ProtectedRoute>
-                <MyStats />
               </ProtectedRoute>
             }
           />
