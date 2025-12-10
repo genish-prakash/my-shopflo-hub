@@ -14,14 +14,14 @@ const ROTATING_TEXTS = [
 ];
 
 const FLOATING_PRODUCTS = [
-  { icon: ShoppingBag, color: "#FF6B6B", delay: 0 },
-  { icon: Sparkles, color: "#4ECDC4", delay: 2 },
-  { icon: Shirt, color: "#45B7D1", delay: 4 },
-  { icon: Wine, color: "#96CEB4", delay: 6 },
-  { icon: Heart, color: "#FF69B4", delay: 8 },
-  { icon: Watch, color: "#FFD93D", delay: 1 },
-  { icon: Headphones, color: "#6C5CE7", delay: 3 },
-  { icon: Dumbbell, color: "#A8E6CF", delay: 5 },
+  { icon: ShoppingBag, color: "#FF6B6B", delay: 0, top: 10 },
+  { icon: Sparkles, color: "#4ECDC4", delay: 3, top: 30 },
+  { icon: Shirt, color: "#45B7D1", delay: 6, top: 55 },
+  { icon: Wine, color: "#96CEB4", delay: 9, top: 75 },
+  { icon: Heart, color: "#FF69B4", delay: 1.5, top: 20 },
+  { icon: Watch, color: "#FFD93D", delay: 4.5, top: 45 },
+  { icon: Headphones, color: "#6C5CE7", delay: 7.5, top: 65 },
+  { icon: Dumbbell, color: "#A8E6CF", delay: 10.5, top: 85 },
 ];
 
 const Login = () => {
@@ -117,27 +117,26 @@ const Login = () => {
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {FLOATING_PRODUCTS.map((product, index) => {
               const IconComponent = product.icon;
-              const topPosition = 15 + (index % 4) * 20;
               return (
                 <div
                   key={index}
                   className="absolute animate-float-bubble"
                   style={{
-                    top: `${topPosition}%`,
+                    top: `${product.top}%`,
                     left: '-80px',
                     animationDelay: `${product.delay}s`,
-                    animationDuration: '12s',
+                    animationDuration: '14s',
                   }}
                 >
                   <div 
-                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg animate-bounce-gentle"
+                    className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg animate-bounce-gentle"
                     style={{ 
                       backgroundColor: `${product.color}20`,
                       border: `2px solid ${product.color}40`,
                     }}
                   >
                     <IconComponent 
-                      className="w-7 h-7 animate-pulse-slow" 
+                      className="w-6 h-6 animate-pulse-slow" 
                       style={{ color: product.color }}
                     />
                   </div>
@@ -158,7 +157,7 @@ const Login = () => {
           {/* Rotating Text with Shimmer */}
           <div className="h-24 flex items-center justify-center text-center px-4 mb-12 z-10">
             <p
-              className={`text-xl font-bold max-w-sm leading-relaxed transition-all duration-400 shimmer-text ${
+              className={`text-[22px] font-bold max-w-sm leading-relaxed transition-all duration-400 shimmer-text ${
                 isTextVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-2"
@@ -191,7 +190,8 @@ const Login = () => {
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground mt-6 px-4 z-10">
+          {/* Privacy Policy - Fixed to bottom */}
+          <p className="absolute bottom-6 left-0 right-0 text-xs text-center text-muted-foreground px-4 z-10">
             By continuing, you agree to Shopflo's Terms of Service and Privacy
             Policy
           </p>
