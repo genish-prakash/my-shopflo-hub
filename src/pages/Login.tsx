@@ -4,13 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import shopfloLogo from "@/assets/shopflo-logo.png";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag, Sparkles, Shirt, Wine, Heart, Watch, Headphones, Dumbbell } from "lucide-react";
 
 const ROTATING_TEXTS = [
   "Stay updated on your online orders at every step.",
   "Discover your next favourite Indian brand.",
   "Discover which brands are currently running a sale.",
   "Follow all your favourite brands at one place.",
+];
+
+const FLOATING_PRODUCTS = [
+  { icon: ShoppingBag, color: "#FF6B6B", delay: 0 },
+  { icon: Sparkles, color: "#4ECDC4", delay: 2 },
+  { icon: Shirt, color: "#45B7D1", delay: 4 },
+  { icon: Wine, color: "#96CEB4", delay: 6 },
+  { icon: Heart, color: "#FF69B4", delay: 8 },
+  { icon: Watch, color: "#FFD93D", delay: 1 },
+  { icon: Headphones, color: "#6C5CE7", delay: 3 },
+  { icon: Dumbbell, color: "#A8E6CF", delay: 5 },
 ];
 
 const Login = () => {
@@ -101,9 +112,42 @@ const Login = () => {
 
       {/* Welcome Screen */}
       {step === "welcome" && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 animate-fade-in">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 animate-fade-in relative overflow-hidden">
+          {/* Floating Product Bubbles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {FLOATING_PRODUCTS.map((product, index) => {
+              const IconComponent = product.icon;
+              const topPosition = 15 + (index % 4) * 20;
+              return (
+                <div
+                  key={index}
+                  className="absolute animate-float-bubble"
+                  style={{
+                    top: `${topPosition}%`,
+                    left: '-80px',
+                    animationDelay: `${product.delay}s`,
+                    animationDuration: '12s',
+                  }}
+                >
+                  <div 
+                    className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg animate-bounce-gentle"
+                    style={{ 
+                      backgroundColor: `${product.color}20`,
+                      border: `2px solid ${product.color}40`,
+                    }}
+                  >
+                    <IconComponent 
+                      className="w-7 h-7 animate-pulse-slow" 
+                      style={{ color: product.color }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Logo */}
-          <div className="mb-8">
+          <div className="mb-8 z-10">
             <img
               src={shopfloLogo}
               alt="Shopflo"
@@ -111,10 +155,10 @@ const Login = () => {
             />
           </div>
 
-          {/* Rotating Text */}
-          <div className="h-20 flex items-center justify-center text-center px-4 mb-12">
+          {/* Rotating Text with Shimmer */}
+          <div className="h-24 flex items-center justify-center text-center px-4 mb-12 z-10">
             <p
-              className={`text-lg text-muted-foreground max-w-xs transition-all duration-400 ${
+              className={`text-xl font-bold max-w-sm leading-relaxed transition-all duration-400 shimmer-text ${
                 isTextVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-2"
@@ -125,7 +169,7 @@ const Login = () => {
           </div>
 
           {/* Text indicators */}
-          <div className="flex gap-2 mb-16">
+          <div className="flex gap-2 mb-16 z-10">
             {ROTATING_TEXTS.map((_, index) => (
               <div
                 key={index}
@@ -141,13 +185,13 @@ const Login = () => {
           {/* Get Started Button */}
           <Button
             onClick={() => setStep("phone")}
-            className="w-full max-w-sm h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
+            className="w-full max-w-sm h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full z-10"
           >
             Get Started
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground mt-6 px-4">
+          <p className="text-xs text-center text-muted-foreground mt-6 px-4 z-10">
             By continuing, you agree to Shopflo's Terms of Service and Privacy
             Policy
           </p>
