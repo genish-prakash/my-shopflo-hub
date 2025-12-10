@@ -9,6 +9,7 @@ import OrderTracking from "./pages/OrderTracking";
 import ExploreBrands from "./pages/ExploreBrands";
 import MyStats from "./pages/MyStats";
 import ShoppingPreferences from "./pages/ShoppingPreferences";
+import BrandDetail from "./pages/BrandDetail";
 import NotFound from "./pages/NotFound";
 
 // Protected Route Component
@@ -64,6 +65,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ShoppingPreferences />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/brand/:brandId"
+            element={
+              <ProtectedRoute>
+                <BrandDetail />
               </ProtectedRoute>
             }
           />
