@@ -4,189 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import wanderLogo from "@/assets/wander-logo.png";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ShoppingBag,
-  Sparkles,
-  Shirt,
-  Wine,
-  Heart,
-  Watch,
-  Headphones,
-  Dumbbell,
-  Gift,
-  Percent,
-  Star,
-  Package,
-} from "lucide-react";
-import Cookies from "js-cookie"; // Added import for js-cookie
-import { sendOtp, verifyOtp } from "@/lib/api";
+import { ArrowLeft, ArrowRight, ShoppingBag, Sparkles, Shirt, Wine, Heart, Watch, Headphones, Dumbbell, Gift, Percent, Star, Package } from "lucide-react";
 
 const ROTATING_TEXTS = [
-  "Shop your favorite brands",
-  "Track all your orders",
-  "Get exclusive rewards",
-  "Seamless checkout experience",
-];
-
-const PRODUCT_IMAGES = [
-  // Fashion & Accessories
-  {
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
-    color: "#FF6B6B",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop",
-    color: "#FFD93D",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200&h=200&fit=crop",
-    color: "#FF69B4",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=200&h=200&fit=crop",
-    color: "#000000",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=200&h=200&fit=crop",
-    color: "#95A5A6",
-  }, // Shoes
-  {
-    image:
-      "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=200&h=200&fit=crop",
-    color: "#3498DB",
-  }, // Sneakers
-  {
-    image:
-      "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=200&h=200&fit=crop",
-    color: "#E74C3C",
-  }, // Puma Shoe
-  {
-    image:
-      "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=200&h=200&fit=crop",
-    color: "#9B59B6",
-  }, // Heels
-
-  // Tech & Gadgets
-  {
-    image:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop",
-    color: "#4ECDC4",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=200&h=200&fit=crop",
-    color: "#2ECC71",
-  }, // Smart Watch
-  {
-    image:
-      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=200&h=200&fit=crop",
-    color: "#F1C40F",
-  }, // Laptop
-  {
-    image:
-      "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200&h=200&fit=crop",
-    color: "#34495E",
-  }, // Mouse
-  {
-    image:
-      "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=200&h=200&fit=crop",
-    color: "#1ABC9C",
-  }, // Keyboard
-
-  // Beauty & Personal Care
-  {
-    image:
-      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop",
-    color: "#96CEB4",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&h=200&fit=crop",
-    color: "#45B7D1",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=200&h=200&fit=crop",
-    color: "#E67E22",
-  }, // Lipstick
-  {
-    image:
-      "https://images.unsplash.com/photo-1571781926291-280553fe18d4?w=200&h=200&fit=crop",
-    color: "#D35400",
-  }, // Makeup Brushes
-  {
-    image:
-      "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=200&h=200&fit=crop",
-    color: "#C0392B",
-  }, // Cream
-
-  // Home & Lifestyle
-  {
-    image:
-      "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=200&h=200&fit=crop",
-    color: "#16A34A",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=200&h=200&fit=crop",
-    color: "#7F8C8D",
-  }, // Lamp
-  {
-    image:
-      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&h=200&fit=crop",
-    color: "#F39C12",
-  }, // Decor
-  {
-    image:
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=200&fit=crop",
-    color: "#27AE60",
-  }, // Chair
-
-  // Food & Drink
-  {
-    image:
-      "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=200&h=200&fit=crop",
-    color: "#D35400",
-  }, // Ice Cream
-  {
-    image:
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&h=200&fit=crop",
-    color: "#8E44AD",
-  }, // Cake
-  {
-    image:
-      "https://images.unsplash.com/photo-1621939514649-28b12e8167c7?w=200&h=200&fit=crop",
-    color: "#2980B9",
-  }, // Burger
-
-  // Sports & Fitness
-  {
-    image:
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop",
-    color: "#2C3E50",
-  }, // Dumbbell
-  {
-    image:
-      "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=200&h=200&fit=crop",
-    color: "#16A085",
-  }, // Gym Bag
-  {
-    image:
-      "https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=200&h=200&fit=crop",
-    color: "#F39C12",
-  }, // Yoga Mat
-  {
-    image:
-      "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=200&h=200&fit=crop",
-    color: "#C0392B",
-  }, // Boxing Gloves
+  "Stay updated on your online orders at every step.",
+  "Discover your next favourite Indian brand.",
+  "Discover which brands are currently running a sale.",
+  "Follow all your favourite brands at one place.",
 ];
 
 const FLOATING_PRODUCTS = [
@@ -209,34 +33,26 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"welcome" | "phone">("welcome");
   const [showOtpInput, setShowOtpInput] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isTextVisible, setIsTextVisible] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [contextId, setContextId] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const token = Cookies.get("shopper_flo_auth_token");
-    if (token) {
-      navigate("/home");
-    }
-  }, [navigate]);
-
+  // Rotate text every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setIsTextVisible(false);
       setTimeout(() => {
         setCurrentTextIndex((prev) => (prev + 1) % ROTATING_TEXTS.length);
         setIsTextVisible(true);
-      }, 500);
+      }, 400);
     }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleSendOtp = async () => {
+  const handleSendOtp = () => {
     if (phoneNumber.length !== 10) {
       toast({
         title: "Invalid phone number",
@@ -247,62 +63,32 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    try {
-      const response = await sendOtp(phoneNumber);
-      setContextId(response.data.context_id);
+    setTimeout(() => {
       setShowOtpInput(true);
+      setIsLoading(false);
       toast({
         title: "OTP Sent",
         description: "Check your phone for the verification code",
       });
-    } catch (error) {
-      toast({
-        title: "Error sending OTP",
-        description: "Please try again later",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 4) {
+  const handleVerifyOtp = () => {
+    if (otp.length !== 6) {
       toast({
         title: "Invalid OTP",
-        description: "Please enter a valid 4-digit OTP",
+        description: "Please enter a valid 6-digit OTP",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    try {
-      const response = await verifyOtp(contextId, otp);
-
-      // Store tokens in cookies
-      Cookies.set("shopper_flo_auth_token", response.access_token, {
-        expires: new Date(response.access_token_expires_at),
-        secure: true,
-        sameSite: "strict",
-      });
-      Cookies.set("shopper_flo_refresh_token", response.refresh_token, {
-        expires: new Date(response.refresh_token_expires_at),
-        secure: true,
-        sameSite: "strict",
-      });
-
+    setTimeout(() => {
+      setIsLoading(false);
       localStorage.setItem("isAuthenticated", "true");
       navigate("/home");
-    } catch (error) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please check the code and try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1000);
   };
 
   const handleBack = () => {
@@ -349,20 +135,20 @@ const Login = () => {
                   className="absolute animate-float-bubble"
                   style={{
                     top: `${product.top}%`,
-                    left: "-80px",
+                    left: '-80px',
                     animationDelay: `${product.delay}s`,
-                    animationDuration: "16s",
+                    animationDuration: '16s',
                   }}
                 >
-                  <div
+                  <div 
                     className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg animate-bounce-gentle backdrop-blur-sm"
-                    style={{
+                    style={{ 
                       backgroundColor: `${product.color}25`,
                       border: `1.5px solid ${product.color}50`,
                     }}
                   >
-                    <IconComponent
-                      className="w-5 h-5"
+                    <IconComponent 
+                      className="w-5 h-5" 
                       style={{ color: product.color }}
                     />
                   </div>
@@ -381,9 +167,7 @@ const Login = () => {
           </div>
 
           {/* App Name */}
-          <h1 className="text-2xl font-bold text-foreground mb-1 z-10">
-            Wander
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground mb-1 z-10">Wander</h1>
           <p className="text-sm text-muted-foreground mb-8 z-10">by Shopflo</p>
 
           {/* Rotating Text with Shimmer */}
@@ -422,7 +206,7 @@ const Login = () => {
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
 
-          {/* Privacy Policy */}
+          {/* Privacy Policy - Fixed to bottom */}
           <p className="absolute bottom-6 left-0 right-0 text-xs text-center text-muted-foreground px-4 z-10">
             By continuing, you agree to Wander's Terms of Service and Privacy
             Policy
@@ -447,14 +231,15 @@ const Login = () => {
                   <p className="text-xs text-muted-foreground">by Shopflo</p>
                 </div>
               </div>
-
+              
               <h1 className="text-xl font-bold text-foreground mb-1">
                 {showOtpInput ? "Verify your number" : "Welcome to Wander"}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {showOtpInput
-                  ? `Enter the code sent to +91 ${phoneNumber}`
-                  : "Enter your phone number to continue"}
+                {showOtpInput 
+                  ? `Enter the code sent to +91 ${phoneNumber}` 
+                  : "Enter your phone number to continue"
+                }
               </p>
             </div>
 
@@ -475,9 +260,7 @@ const Login = () => {
                     placeholder="Enter phone number"
                     value={phoneNumber}
                     onChange={(e) =>
-                      setPhoneNumber(
-                        e.target.value.replace(/\D/g, "").slice(0, 10)
-                      )
+                      setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))
                     }
                     className="flex-1 h-12 bg-muted/50 border-0 rounded-xl text-base placeholder:text-muted-foreground/60"
                     autoFocus
@@ -494,10 +277,10 @@ const Login = () => {
                   </label>
                   <Input
                     type="text"
-                    placeholder="Enter 4-digit OTP"
+                    placeholder="Enter 6-digit OTP"
                     value={otp}
                     onChange={(e) =>
-                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     className="h-12 bg-muted/50 border-0 rounded-xl text-xl text-center tracking-[0.3em] placeholder:text-muted-foreground/60 placeholder:tracking-normal placeholder:text-sm"
                     autoFocus
@@ -529,12 +312,8 @@ const Login = () => {
                     <Package className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">
-                      Track all orders
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Real-time updates from all brands
-                    </p>
+                    <p className="text-sm font-medium text-foreground">Track all orders</p>
+                    <p className="text-xs text-muted-foreground">Real-time updates from all brands</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-2xl p-3">
@@ -542,12 +321,8 @@ const Login = () => {
                     <Percent className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">
-                      Exclusive offers
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Get deals from your favorite brands
-                    </p>
+                    <p className="text-sm font-medium text-foreground">Exclusive offers</p>
+                    <p className="text-xs text-muted-foreground">Get deals from your favorite brands</p>
                   </div>
                 </div>
               </div>
@@ -566,7 +341,7 @@ const Login = () => {
             ) : (
               <Button
                 onClick={handleVerifyOtp}
-                disabled={isLoading || otp.length !== 4}
+                disabled={isLoading || otp.length !== 6}
                 className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
               >
                 {isLoading ? "Verifying..." : "Verify & Continue"}

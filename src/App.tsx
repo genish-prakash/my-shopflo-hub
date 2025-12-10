@@ -13,11 +13,8 @@ import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 // Protected Route Component
-import Cookies from "js-cookie";
-
-// Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = !!Cookies.get("shopper_flo_auth_token");
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
   return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
 };
 
