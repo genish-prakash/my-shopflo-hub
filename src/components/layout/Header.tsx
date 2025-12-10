@@ -1,13 +1,6 @@
-import { User, Settings, Shield, SlidersHorizontal, MapPin, Bell } from "lucide-react";
+import { User, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ViewType } from "@/pages/Home";
 import wanderLogo from "@/assets/wander-logo.png";
 
@@ -24,10 +17,7 @@ const Header = ({ onViewChange }: HeaderProps) => {
         {/* Logo - Left Side */}
         <div className="flex items-center gap-2">
           <img src={wanderLogo} alt="Wander" className="h-7 w-7 rounded-lg" />
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground leading-tight">Wander</span>
-            <span className="text-[10px] text-muted-foreground leading-tight">by Shopflo</span>
-          </div>
+          <span className="text-sm font-semibold text-foreground">Wander</span>
         </div>
 
         {/* Right Side - Notifications & Profile */}
@@ -41,62 +31,17 @@ const Header = ({ onViewChange }: HeaderProps) => {
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
           </button>
 
-          {/* Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
-              <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 hover:ring-primary transition-smooth">
-                <AvatarImage src="" alt="Profile" />
-                <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold text-xs">
-                  RK
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="end" 
-              className="w-56 bg-card border-border z-[100]"
-            >
-              <div className="px-2 py-3 border-b border-border">
-                <p className="text-sm font-medium text-foreground">Rahul Kumar</p>
-                <p className="text-xs text-muted-foreground">rahul.kumar@email.com</p>
-              </div>
-              
-              <DropdownMenuItem 
-                onClick={() => onViewChange("profile")}
-                className="cursor-pointer py-2.5"
-              >
-                <User className="mr-2 h-4 w-4 text-primary" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem 
-                onClick={() => navigate('/shopping-preferences')}
-                className="cursor-pointer py-2.5"
-              >
-                <SlidersHorizontal className="mr-2 h-4 w-4 text-primary" />
-                <span>Shopping Preferences</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem 
-                onClick={() => onViewChange("addresses")}
-                className="cursor-pointer py-2.5"
-              >
-                <MapPin className="mr-2 h-4 w-4 text-primary" />
-                <span>My Addresses</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem className="cursor-pointer py-2.5">
-                <Shield className="mr-2 h-4 w-4 text-primary" />
-                <span>Privacy & Consent</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem className="cursor-pointer py-2.5">
-                <Settings className="mr-2 h-4 w-4 text-primary" />
-                <span>Wander Settings</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Profile - Navigate to Account Page */}
+          <button
+            onClick={() => navigate('/account')}
+            className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full"
+          >
+            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-neutral-200 hover:ring-neutral-300 transition-all">
+              <AvatarFallback className="bg-neutral-200 text-neutral-600 font-semibold text-xs">
+                RK
+              </AvatarFallback>
+            </Avatar>
+          </button>
         </div>
       </div>
     </header>
