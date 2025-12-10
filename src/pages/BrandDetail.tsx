@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { mockBrands, Brand, Product } from "@/data/brands";
+import ProductDetailSheet from "@/components/ProductDetailSheet";
+import shopfloLogo from "@/assets/shopflo-logo.png";
 
 type SortOption = "best-selling" | "newest" | "price-low-high" | "price-high-low";
 
@@ -31,6 +33,7 @@ const BrandDetail = () => {
   const [sortBy, setSortBy] = useState<SortOption>("best-selling");
   const [showOnSale, setShowOnSale] = useState(false);
   const [showInStock, setShowInStock] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const toggleWishlist = (productId: string) => {
     if (!brand) return;
@@ -93,6 +96,31 @@ const BrandDetail = () => {
     }
   };
 
+  const openProductDetail = (product: Product) => {
+    if (!brand) return;
+    setSelectedProduct({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      images: [product.image, product.image, product.image],
+      brand: {
+        name: brand.name,
+        logo: brand.logo,
+        color: brand.color,
+        website: `https://${brand.name.toLowerCase().replace(/\s+/g, '')}.com`,
+      },
+      description: `Premium ${product.name} from ${brand.name}. High quality product with excellent craftsmanship.`,
+      variants: [
+        { id: "s", name: "S", available: true },
+        { id: "m", name: "M", available: true },
+        { id: "l", name: "L", available: product.inStock },
+        { id: "xl", name: "XL", available: true },
+      ],
+      isWishlisted: product.isWishlisted,
+    });
+  };
+
   if (!brand) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -139,6 +167,10 @@ const BrandDetail = () => {
             </div>
             <h1 className="text-xl font-bold text-foreground">{brand.name}</h1>
           </div>
+          {/* Shopflo Logo */}
+          <div className="flex items-center">
+            <img src={shopfloLogo} alt="Shopflo" className="h-6" />
+          </div>
         </div>
 
         <div className="px-4 pb-24">
@@ -171,6 +203,7 @@ const BrandDetail = () => {
                   <div 
                     key={product.id}
                     className="flex-shrink-0 w-[75%] snap-start"
+                    onClick={() => openProductDetail(product)}
                   >
                     <RecommendedProductCard 
                       product={product}
@@ -246,18 +279,30 @@ const BrandDetail = () => {
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {filteredAndSortedProducts.map((product) => (
-                  <ProductCard 
-                    key={product.id}
-                    product={product}
-                    brandColor={brand.color}
-                    onToggleWishlist={() => toggleWishlist(product.id)}
-                  />
+                  <div key={product.id} onClick={() => openProductDetail(product)}>
+                    <ProductCard 
+                      product={product}
+                      brandColor={brand.color}
+                      onToggleWishlist={() => toggleWishlist(product.id)}
+                    />
+                  </div>
                 ))}
               </div>
             )}
           </section>
         </div>
       </div>
+
+      {/* Product Detail Sheet */}
+      <ProductDetailSheet
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        product={selectedProduct}
+        onToggleWishlist={(id) => {
+          toggleWishlist(id);
+          setSelectedProduct(null);
+        }}
+      />
     </div>
   );
 };
@@ -270,7 +315,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps) => (
   <div
-    className="relative bg-card rounded-2xl p-3 shadow-sm"
+    className="relative bg-card rounded-2xl p-3 shadow-sm cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
     style={{
       background: `linear-gradient(135deg, ${brandColor}08 0%, ${brandColor}04 100%)`,
     }}
@@ -309,7 +354,10 @@ const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps
 
     {/* Wishlist - Bottom Right */}
     <button
-      onClick={onToggleWishlist}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggleWishlist();
+      }}
       className="absolute bottom-3 right-3 p-1"
     >
       <Heart
@@ -325,7 +373,7 @@ const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps
 
 const RecommendedProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps) => (
   <div
-    className="relative bg-card rounded-2xl p-4 shadow-sm"
+    className="relative bg-card rounded-2xl p-4 shadow-sm cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
     style={{
       background: `linear-gradient(135deg, ${brandColor}12 0%, ${brandColor}06 100%)`,
     }}
@@ -364,7 +412,10 @@ const RecommendedProductCard = ({ product, brandColor, onToggleWishlist }: Produ
 
     {/* Wishlist - Bottom Right */}
     <button
-      onClick={onToggleWishlist}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggleWishlist();
+      }}
       className="absolute bottom-4 right-4 p-2 bg-background/80 rounded-full shadow-sm"
     >
       <Heart

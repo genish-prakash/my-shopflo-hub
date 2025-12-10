@@ -1,4 +1,4 @@
-import { User, Settings, Shield, SlidersHorizontal, MapPin, BarChart3, Bell } from "lucide-react";
+import { User, Settings, Shield, SlidersHorizontal, MapPin, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ViewType } from "@/pages/Home";
 import shopPassLogo from "@/assets/shop-pass-logo.svg";
+import shopfloLogo from "@/assets/shopflo-logo.png";
 
 interface HeaderProps {
   onViewChange: (view: ViewType) => void;
@@ -26,8 +27,11 @@ const Header = ({ onViewChange }: HeaderProps) => {
           <img src={shopPassLogo} alt="Shop Pass" className="h-5" />
         </div>
 
-        {/* Right Side - Notifications & Profile */}
+        {/* Right Side - Shopflo Logo, Notifications & Profile */}
         <div className="flex items-center gap-3">
+          {/* Shopflo Logo */}
+          <img src={shopfloLogo} alt="Shopflo" className="h-5" />
+
           {/* Notifications */}
           <button 
             onClick={() => navigate('/notifications')}
@@ -80,19 +84,10 @@ const Header = ({ onViewChange }: HeaderProps) => {
                 <span>My Addresses</span>
               </DropdownMenuItem>
               
-              <DropdownMenuItem 
-                onClick={() => navigate('/my-stats')}
-                className="cursor-pointer py-2.5"
-              >
-                <BarChart3 className="mr-2 h-4 w-4 text-primary" />
-                <span>My Stats</span>
-              </DropdownMenuItem>
-              
               <DropdownMenuItem className="cursor-pointer py-2.5">
                 <Shield className="mr-2 h-4 w-4 text-primary" />
                 <span>Privacy & Consent</span>
               </DropdownMenuItem>
-              
               
               <DropdownMenuSeparator />
               

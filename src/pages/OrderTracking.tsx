@@ -7,14 +7,14 @@ const mockOrderDetails: Record<string, any> = {
   "ORD-78234": {
     id: "ORD-78234",
     brand: "Nike Store",
-    brandLogo: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop",
+    brandLogo: "https://logo.clearbit.com/nike.com",
     product: "Air Max 270 React",
     orderDate: "Jan 15, 2024",
     status: "In Transit",
     price: "₹12,999",
     address: "123 MG Road, Bangalore, Karnataka 560001",
     items: [
-      { name: "Air Max 270 React - Black/White", quantity: 1, price: 12999 },
+      { name: "Air Max 270 React - Black/White", quantity: 1, price: 12999, image: "👟" },
     ],
     timeline: [
       { status: "Order Placed", date: "Jan 15, 2024", completed: true, icon: CheckCircle },
@@ -27,14 +27,14 @@ const mockOrderDetails: Record<string, any> = {
   "ORD-78235": {
     id: "ORD-78235",
     brand: "Apple Store",
-    brandLogo: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=100&h=100&fit=crop",
+    brandLogo: "https://logo.clearbit.com/apple.com",
     product: "AirPods Pro (2nd Gen)",
     orderDate: "Jan 10, 2024",
     status: "Delivered",
     price: "₹24,900",
     address: "456 Park Street, Mumbai, Maharashtra 400001",
     items: [
-      { name: "AirPods Pro (2nd Generation)", quantity: 1, price: 24900 },
+      { name: "AirPods Pro (2nd Generation)", quantity: 1, price: 24900, image: "🎧" },
     ],
     timeline: [
       { status: "Order Placed", date: "Jan 10, 2024", completed: true, icon: CheckCircle },
@@ -47,14 +47,14 @@ const mockOrderDetails: Record<string, any> = {
   "ORD-78236": {
     id: "ORD-78236",
     brand: "Zara Fashion",
-    brandLogo: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=100&h=100&fit=crop",
+    brandLogo: "https://logo.clearbit.com/zara.com",
     product: "Premium Cotton Shirt",
     orderDate: "Jan 18, 2024",
     status: "Processing",
     price: "₹2,499",
     address: "789 Brigade Road, Bangalore, Karnataka 560025",
     items: [
-      { name: "Premium Cotton Shirt - Blue", quantity: 1, price: 2499 },
+      { name: "Premium Cotton Shirt - Blue", quantity: 1, price: 2499, image: "👔" },
     ],
     timeline: [
       { status: "Order Placed", date: "Jan 18, 2024", completed: true, icon: CheckCircle },
@@ -67,14 +67,14 @@ const mockOrderDetails: Record<string, any> = {
   "ORD-78237": {
     id: "ORD-78237",
     brand: "Samsung",
-    brandLogo: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=100&h=100&fit=crop",
+    brandLogo: "https://logo.clearbit.com/samsung.com",
     product: "Galaxy Buds Pro",
     orderDate: "Jan 5, 2024",
     status: "Delivered",
     price: "₹9,999",
     address: "321 Cyber City, Gurgaon, Haryana 122002",
     items: [
-      { name: "Galaxy Buds Pro - Black", quantity: 1, price: 9999 },
+      { name: "Galaxy Buds Pro - Black", quantity: 1, price: 9999, image: "🎧" },
     ],
     timeline: [
       { status: "Order Placed", date: "Jan 5, 2024", completed: true, icon: CheckCircle },
@@ -107,18 +107,18 @@ const OrderTracking = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Delivered":
-        return "bg-success/10 text-success";
+        return "bg-green-100 text-green-700";
       case "In Transit":
-        return "bg-primary/10 text-primary";
+        return "bg-blue-100 text-blue-700";
       case "Processing":
-        return "bg-warning/10 text-warning";
+        return "bg-amber-100 text-amber-700";
       default:
         return "bg-muted text-muted-foreground";
     }
   };
 
   return (
-    <div className="min-h-screen bg-background pb-6">
+    <div className="min-h-screen bg-muted/30 pb-6">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="flex items-center gap-3 h-14 px-4">
@@ -137,13 +137,16 @@ const OrderTracking = () => {
       </div>
 
       {/* Order Card */}
-      <div className="bg-card mx-4 mt-4 rounded-xl overflow-hidden">
+      <div className="bg-card mx-4 mt-4 rounded-2xl overflow-hidden">
         <div className="flex items-center gap-3 p-4">
-          <div className="w-16 h-16 rounded-xl overflow-hidden bg-secondary shrink-0">
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary shrink-0 flex items-center justify-center">
             <img 
               src={order.brandLogo} 
               alt={order.brand}
-              className="w-full h-full object-cover"
+              className="w-8 h-8 object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
           </div>
           <div className="flex-1 min-w-0">
@@ -157,8 +160,31 @@ const OrderTracking = () => {
         </div>
       </div>
 
+      {/* Order Items with Images */}
+      <div className="bg-card mx-4 mt-3 rounded-2xl p-4">
+        <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+          <Package className="w-4 h-4" />
+          Items
+        </h3>
+        
+        <div className="space-y-3">
+          {order.items.map((item: any, index: number) => (
+            <div key={index} className="flex items-center gap-3 bg-muted/30 rounded-xl p-3">
+              <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center text-3xl shrink-0">
+                {item.image}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+              </div>
+              <p className="text-sm font-semibold text-foreground">₹{item.price.toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Delivery Address */}
-      <div className="bg-card mx-4 mt-3 rounded-xl p-4">
+      <div className="bg-card mx-4 mt-3 rounded-2xl p-4">
         <div className="flex items-start gap-3">
           <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div>
@@ -169,7 +195,7 @@ const OrderTracking = () => {
       </div>
 
       {/* Tracking Timeline */}
-      <div className="bg-card mx-4 mt-3 rounded-xl p-4">
+      <div className="bg-card mx-4 mt-3 rounded-2xl p-4">
         <h3 className="font-semibold text-foreground mb-4">Tracking</h3>
         
         <div className="space-y-0">
@@ -212,21 +238,6 @@ const OrderTracking = () => {
             );
           })}
         </div>
-      </div>
-
-      {/* Order Items */}
-      <div className="bg-card mx-4 mt-3 rounded-xl p-4">
-        <h3 className="font-semibold text-foreground mb-3">Items</h3>
-        
-        {order.items.map((item: any, index: number) => (
-          <div key={index} className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-foreground">{item.name}</p>
-              <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-            </div>
-            <p className="text-sm font-medium text-foreground">₹{item.price.toLocaleString()}</p>
-          </div>
-        ))}
       </div>
     </div>
   );
