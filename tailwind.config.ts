@@ -2,7 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -14,7 +19,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Hanken Grotesk', 'sans-serif'],
+        sans: ["Hanken Grotesk", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -74,17 +79,17 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-primary': 'var(--gradient-primary)',
-        'gradient-secondary': 'var(--gradient-secondary)',
-        'gradient-accent': 'var(--gradient-accent)',
-        'gradient-success': 'var(--gradient-success)',
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-secondary": "var(--gradient-secondary)",
+        "gradient-accent": "var(--gradient-accent)",
+        "gradient-success": "var(--gradient-success)",
       },
       boxShadow: {
-        'card': 'var(--shadow-card)',
-        'card-hover': 'var(--shadow-card-hover)',
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
       },
       transitionProperty: {
-        'smooth': 'var(--transition-smooth)',
+        smooth: "var(--transition-smooth)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -92,6 +97,14 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
+        },
+        "marquee-vertical": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(calc(-100% - var(--gap)))" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -105,19 +118,19 @@ export default {
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "float-bubble": {
-          "0%": { 
+          "0%": {
             transform: "translateX(0) translateY(0)",
-            opacity: "0"
+            opacity: "0",
           },
-          "10%": { 
-            opacity: "1"
+          "10%": {
+            opacity: "1",
           },
-          "90%": { 
-            opacity: "1"
+          "90%": {
+            opacity: "1",
           },
-          "100%": { 
+          "100%": {
             transform: "translateX(calc(100vw + 100px)) translateY(-20px)",
-            opacity: "0"
+            opacity: "0",
           },
         },
         "bounce-gentle": {
@@ -136,6 +149,8 @@ export default {
         "float-bubble": "float-bubble 12s linear infinite",
         "bounce-gentle": "bounce-gentle 2s ease-in-out infinite",
         "pulse-slow": "pulse-slow 3s ease-in-out infinite",
+        marquee: "marquee var(--duration) linear infinite",
+        "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
     },
   },
