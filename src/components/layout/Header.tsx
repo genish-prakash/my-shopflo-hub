@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ViewType } from "@/pages/Home";
-import shopPassLogo from "@/assets/shop-pass-logo.svg";
-import shopfloLogo from "@/assets/shopflo-logo.png";
+import wanderLogo from "@/assets/wander-logo.png";
 
 interface HeaderProps {
   onViewChange: (view: ViewType) => void;
@@ -22,16 +21,17 @@ const Header = ({ onViewChange }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border shadow-sm safe-top">
       <div className="flex items-center justify-between h-12 px-4">
-        {/* Logo */}
-        <div className="flex items-center">
-          <img src={shopPassLogo} alt="Shop Pass" className="h-5" />
+        {/* Logo - Left Side */}
+        <div className="flex items-center gap-2">
+          <img src={wanderLogo} alt="Wander" className="h-7 w-7 rounded-lg" />
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-foreground leading-tight">Wander</span>
+            <span className="text-[10px] text-muted-foreground leading-tight">by Shopflo</span>
+          </div>
         </div>
 
-        {/* Right Side - Shopflo Logo, Notifications & Profile */}
+        {/* Right Side - Notifications & Profile */}
         <div className="flex items-center gap-3">
-          {/* Shopflo Logo */}
-          <img src={shopfloLogo} alt="Shopflo" className="h-5" />
-
           {/* Notifications */}
           <button 
             onClick={() => navigate('/notifications')}
@@ -93,7 +93,7 @@ const Header = ({ onViewChange }: HeaderProps) => {
               
               <DropdownMenuItem className="cursor-pointer py-2.5">
                 <Settings className="mr-2 h-4 w-4 text-primary" />
-                <span>My Shop Pass Settings</span>
+                <span>Wander Settings</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
