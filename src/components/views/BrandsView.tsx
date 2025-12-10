@@ -109,7 +109,6 @@ const BrandsView = () => {
                   <div className="flex items-center justify-center text-4xl py-6">
                     {product.image}
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{product.name}</p>
                   <p className="text-[10px] text-muted-foreground/70">{brand.name}</p>
                   <button
                     onClick={(e) => toggleWishlist(e, brand.id, product.id)}
@@ -177,7 +176,7 @@ const BrandsView = () => {
                   </div>
                 </div>
 
-                {/* Products Grid - 2x2 */}
+                {/* Products Grid - 2x2 - No product names */}
                 <div className="px-4 pb-2">
                   <div className="grid grid-cols-2 gap-3">
                     {brand.products.slice(0, 4).map((product) => (
@@ -202,9 +201,6 @@ const BrandsView = () => {
                         <div className="flex-1 flex items-center justify-center text-4xl">
                           {product.image}
                         </div>
-
-                        {/* Product Name */}
-                        <p className="text-xs text-muted-foreground truncate">{product.name}</p>
 
                         {/* Wishlist - Bottom Right */}
                         <button
