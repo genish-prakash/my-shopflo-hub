@@ -1,4 +1,4 @@
-import { ShoppingBag, Grid3X3, Store, Award, Tag } from "lucide-react";
+import { ShoppingBag, Grid3X3, Store, Tag } from "lucide-react";
 import { ViewType } from "@/pages/Home";
 
 interface BottomNavProps {
@@ -12,7 +12,6 @@ const BottomNav = ({ currentView, onViewChange }: BottomNavProps) => {
     { id: "orders" as ViewType, label: "Orders", icon: ShoppingBag },
     { id: "offers" as ViewType, label: "Offers", icon: Tag },
     { id: "products" as ViewType, label: "Products", icon: Grid3X3 },
-    { id: "rewards" as ViewType, label: "Rewards", icon: Award },
   ];
 
   return (
