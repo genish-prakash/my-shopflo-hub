@@ -167,8 +167,7 @@ const Login = () => {
           </div>
 
           {/* App Name */}
-          <h1 className="text-2xl font-bold text-foreground mb-1 z-10">Wander</h1>
-          <p className="text-sm text-muted-foreground mb-8 z-10">by Shopflo</p>
+          <h1 className="text-2xl font-bold text-foreground mb-8 z-10">Wander</h1>
 
           {/* Rotating Text with Shimmer */}
           <div className="h-24 flex items-center justify-center text-center px-4 mb-10 z-10">
@@ -228,7 +227,6 @@ const Login = () => {
                 />
                 <div>
                   <h2 className="font-semibold text-foreground">Wander</h2>
-                  <p className="text-xs text-muted-foreground">by Shopflo</p>
                 </div>
               </div>
               
