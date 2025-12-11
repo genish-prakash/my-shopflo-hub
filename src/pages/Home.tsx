@@ -2,13 +2,13 @@ import { useState } from "react";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import OrdersView from "@/components/views/OrdersView";
-import ProductsView from "@/components/views/ProductsView";
+import ReviewsView from "@/components/views/ReviewsView";
 import BrandsView from "@/components/views/BrandsView";
 import OffersView from "@/components/views/OffersView";
 import ProfileView from "@/components/views/ProfileView";
 import AddressesView from "@/components/views/AddressesView";
 
-export type ViewType = "orders" | "products" | "brands" | "offers" | "profile" | "addresses";
+export type ViewType = "orders" | "reviews" | "brands" | "offers" | "profile" | "addresses";
 
 const Home = () => {
   const [currentView, setCurrentView] = useState<ViewType>("brands");
@@ -17,8 +17,8 @@ const Home = () => {
     switch (currentView) {
       case "orders":
         return <OrdersView />;
-      case "products":
-        return <ProductsView />;
+      case "reviews":
+        return <ReviewsView />;
       case "brands":
         return <BrandsView />;
       case "offers":
