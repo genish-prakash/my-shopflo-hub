@@ -22,7 +22,7 @@ const Account = () => {
       icon: User,
       label: "Account and Login",
       description: "Manage your account details",
-      onClick: () => {},
+      onClick: () => navigate('/profile'),
     },
     {
       icon: SlidersHorizontal,
@@ -34,7 +34,7 @@ const Account = () => {
       icon: MapPin,
       label: "My Addresses",
       description: "Manage delivery addresses",
-      onClick: () => {},
+      onClick: () => navigate('/addresses'),
     },
     {
       icon: Shield,

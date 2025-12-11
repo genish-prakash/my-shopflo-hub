@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { mockBrands, Brand, Product } from "@/data/brands";
 import ProductDetailSheet from "@/components/ProductDetailSheet";
-import shopfloLogo from "@/assets/shopflo-logo.png";
 
 type SortOption = "best-selling" | "newest" | "price-low-high" | "price-high-low";
 
@@ -166,10 +165,6 @@ const BrandDetail = () => {
               />
             </div>
             <h1 className="text-xl font-bold text-foreground">{brand.name}</h1>
-          </div>
-          {/* Shopflo Logo */}
-          <div className="flex items-center">
-            <img src={shopfloLogo} alt="Shopflo" className="h-6" />
           </div>
         </div>
 

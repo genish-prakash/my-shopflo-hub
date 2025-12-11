@@ -86,7 +86,7 @@ const ShoppingPreferences = () => {
                 <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="w-full" onClick={() => handleSave("Gender")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Gender")}>Save</Button>
           </div>
         );
 
@@ -99,7 +99,7 @@ const ShoppingPreferences = () => {
               value={preferences.birthday}
               onChange={(e) => setPreferences({ ...preferences, birthday: e.target.value })}
             />
-            <Button className="w-full" onClick={() => handleSave("Birthday")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Birthday")}>Save</Button>
           </div>
         );
 
@@ -154,7 +154,7 @@ const ShoppingPreferences = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full" onClick={() => handleSave("Sizing")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Sizing")}>Save</Button>
           </div>
         );
 
@@ -213,7 +213,7 @@ const ShoppingPreferences = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full" onClick={() => handleSave("Skin Care")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Skin Care")}>Save</Button>
           </div>
         );
 
@@ -256,7 +256,7 @@ const ShoppingPreferences = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full" onClick={() => handleSave("Hair Care")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Hair Care")}>Save</Button>
           </div>
         );
 
@@ -296,7 +296,7 @@ const ShoppingPreferences = () => {
                 <Label htmlFor="push" className="font-normal">Push Notification</Label>
               </div>
             </div>
-            <Button className="w-full" onClick={() => handleSave("Marketing")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Marketing")}>Save</Button>
           </div>
         );
 
@@ -335,7 +335,7 @@ const ShoppingPreferences = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full" onClick={() => handleSave("Shipping")}>Save</Button>
+            <Button className="w-full bg-foreground text-background hover:bg-foreground/90" onClick={() => handleSave("Shipping")}>Save</Button>
           </div>
         );
 
@@ -380,8 +380,8 @@ const ShoppingPreferences = () => {
               onClick={() => setActiveDialog(section.id)}
             >
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Icon className="h-5 w-5 text-primary" />
+                <div className="h-10 w-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-neutral-500" />
                 </div>
                 <div>
                   <h4 className="font-medium text-foreground">{section.label}</h4>
