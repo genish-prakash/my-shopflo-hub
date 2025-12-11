@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { shopfloAuthApi } from "@/services/authApi";
 import wanderLogo from "@/assets/wander-logo.png";
 import tshirtImg from "@/assets/tshirt_wander.png";
 import shoesImg from "@/assets/shoes_wander.png";
@@ -52,6 +53,7 @@ const Login = () => {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isTextVisible, setIsTextVisible] = useState(true);
+  const [contextId, setContextId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -68,14 +70,6 @@ const Login = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulated backend check for new/existing user
-  const checkUserStatus = async (phone: string): Promise<boolean> => {
-    // Simulate API call - returns true if new user
-    await new Promise(resolve => setTimeout(resolve, 500));
-    // For demo: phone numbers starting with 9 are new users
-    return phone.startsWith("9");
-  };
-
   const handleSendOtp = async () => {
     if (phoneNumber.length !== 10) {
       toast({
@@ -87,51 +81,80 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    
-    // Check if user is new or existing
-    const newUser = await checkUserStatus(phoneNumber);
-    setIsNewUser(newUser);
-    
-    // Both new and existing users verify phone first
-    setTimeout(() => {
-      setShowOtpInput(true);
-      setIsLoading(false);
+
+    try {
+      const response = await shopfloAuthApi.sendOtp(phoneNumber);
+
+      if (response.success) {
+        setContextId(response.data.context_id);
+        setIsNewUser(response.data.is_new_customer);
+        setShowOtpInput(true);
+
+        toast({
+          title: "OTP Sent",
+          description: "Check your phone for the verification code",
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send OTP. Please try again.";
       toast({
-        title: "OTP Sent",
-        description: "Check your phone for the verification code",
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
       });
-    }, 500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyPhoneOtp = () => {
-    if (phoneOtp.length !== 6) {
+  const handleVerifyPhoneOtp = async () => {
+    if (phoneOtp.length !== 4) {
       toast({
         title: "Invalid OTP",
-        description: "Please enter a valid 6-digit OTP",
+        description: "Please enter a valid 4-digit OTP",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!contextId) {
+      toast({
+        title: "Error",
+        description: "Session expired. Please request a new OTP.",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setPhoneVerified(true);
-      
-      if (isNewUser) {
-        // New user - proceed to email verification
-        setShowOtpInput(false);
-        setStep("email");
+
+    try {
+      const response = await shopfloAuthApi.verifyOtp(contextId, phoneOtp);
+
+      if (response.success && response.data.otp_verified) {
+        // Store auth tokens in cookies
+        shopfloAuthApi.setAuthToken(response.data.access_token, response.data.refresh_token);
+
+        setPhoneVerified(true);
+
         toast({
-          title: "Phone Verified",
-          description: "Now please verify your email",
+          title: "Success",
+          description: "Phone verified successfully!",
         });
-      } else {
-        // Existing user - login complete
-        localStorage.setItem("isAuthenticated", "true");
+
+        // Navigate to home page
         navigate("/home");
       }
-    }, 1000);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to verify OTP. Please try again.";
+      toast({
+        title: "Verification Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSendEmailOtp = () => {
@@ -378,26 +401,38 @@ const Login = () => {
                   </label>
                   <Input
                     type="text"
-                    placeholder="Enter 6-digit OTP"
+                    placeholder="Enter 4-digit OTP"
                     value={phoneOtp}
                     onChange={(e) =>
-                      setPhoneOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      setPhoneOtp(e.target.value.replace(/\D/g, "").slice(0, 4))
                     }
                     className="h-12 bg-muted/50 border-0 rounded-xl text-xl text-center tracking-[0.3em] placeholder:text-muted-foreground/60 placeholder:tracking-normal placeholder:text-sm"
                     autoFocus
                   />
                   <button
-                    onClick={() => {
-                      setShowOtpInput(false);
-                      setTimeout(() => {
-                        setShowOtpInput(true);
+                    onClick={async () => {
+                      setIsLoading(true);
+                      try {
+                        const response = await shopfloAuthApi.sendOtp(phoneNumber);
+                        if (response.success) {
+                          setContextId(response.data.context_id);
+                          toast({
+                            title: "OTP Resent",
+                            description: "A new code has been sent to your phone",
+                          });
+                        }
+                      } catch (error) {
                         toast({
-                          title: "OTP Resent",
-                          description: "A new code has been sent to your phone",
+                          title: "Error",
+                          description: "Failed to resend OTP. Please try again.",
+                          variant: "destructive",
                         });
-                      }, 500);
+                      } finally {
+                        setIsLoading(false);
+                      }
                     }}
                     className="text-xs text-muted-foreground hover:text-foreground hover:underline mt-3 block"
+                    disabled={isLoading}
                   >
                     Didn't receive code? Resend
                   </button>
@@ -442,7 +477,7 @@ const Login = () => {
             ) : (
               <Button
                 onClick={handleVerifyPhoneOtp}
-                disabled={isLoading || phoneOtp.length !== 6}
+                disabled={isLoading || phoneOtp.length !== 4}
                 className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
               >
                 {isLoading ? "Verifying..." : "Verify & Continue"}
