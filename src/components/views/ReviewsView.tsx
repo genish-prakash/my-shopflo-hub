@@ -169,39 +169,19 @@ const ReviewsView = () => {
                     <span className="text-xs text-muted-foreground">{order.id}</span>
                   </div>
 
-                  {/* Bottom Row - Product Circles & Review Status */}
-                  <div className="flex items-center justify-between">
-                    {/* Product Circles */}
-                    <div className="flex items-center">
-                      {order.items.slice(0, 4).map((item, index) => (
-                        <div 
-                          key={index}
-                          className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm border-2 border-card -ml-1 first:ml-0"
-                        >
-                          {item.image}
-                        </div>
-                      ))}
-                      {order.items.length > 4 && (
-                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground border-2 border-card -ml-1">
-                          +{order.items.length - 4}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Review Status & Arrow */}
-                    <div className="flex items-center gap-2">
-                      {allReviewed ? (
-                        <div className="flex items-center gap-1 text-green-600">
-                          <Star className="w-4 h-4 fill-current" />
-                          <span className="text-xs font-medium">Done</span>
-                        </div>
-                      ) : (
-                        <div className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                          {reviewedCount}/{order.items.length} Reviewed
-                        </div>
-                      )}
-                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                    </div>
+                  {/* Review Status & Arrow */}
+                  <div className="flex items-center justify-end gap-2">
+                    {allReviewed ? (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="text-xs font-medium">Done</span>
+                      </div>
+                    ) : (
+                      <div className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                        {reviewedCount}/{order.items.length} Reviewed
+                      </div>
+                    )}
+                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
                   </div>
                 </div>
               </div>
