@@ -1,19 +1,20 @@
 import { LogOut, Phone, Mail, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { logout } from "@/lib/auth";
 
 const ProfileView = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    navigate("/");
     toast({
       title: "Logged out successfully",
       description: "See you again soon!",
     });
+    // Clear auth cookies and redirect to login
+    setTimeout(() => {
+      logout();
+    }, 500);
   };
 
   return (

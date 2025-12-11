@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { isAuthenticated } from "@/lib/auth";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Account from "./pages/Account";
@@ -15,10 +16,14 @@ import BrandDetail from "./pages/BrandDetail";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
-// Protected Route Component
+// Protected Route Component - redirects to login if not authenticated
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
+  return isAuthenticated() ? <>{children}</> : <Navigate to="/" replace />;
+};
+
+// Public Route Component - redirects to home if already authenticated
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  return isAuthenticated() ? <Navigate to="/home" replace /> : <>{children}</>;
 };
 
 const queryClient = new QueryClient();
@@ -30,7 +35,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
           <Route
             path="/home"
             element={

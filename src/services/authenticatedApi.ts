@@ -13,12 +13,34 @@ const authenticatedApiClient: AxiosInstance = axios.create({
   },
 });
 
-// Add request interceptor to include JWT token from cookies
+// Helper to extract user_id from JWT token
+const getUserIdFromToken = (): string | null => {
+  const accessToken = Cookies.get('shopflo_access_token');
+  if (!accessToken) return null;
+
+  try {
+    // JWT format: header.payload.signature
+    const payload = accessToken.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.payload?.user_id || null;
+  } catch (error) {
+    console.error('Failed to decode token:', error);
+    return null;
+  }
+};
+
+// Add request interceptor to include JWT token and user ID from cookies
 authenticatedApiClient.interceptors.request.use(
   (config) => {
     const accessToken = Cookies.get('shopflo_access_token');
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+
+      // Add X-SHOPFLO-REQ-ID header for Mystique APIs
+      const userId = getUserIdFromToken();
+      if (userId) {
+        config.headers['X-SHOPFLO-REQ-ID'] = userId;
+      }
     }
     return config;
   },
