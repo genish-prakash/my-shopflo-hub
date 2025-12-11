@@ -42,11 +42,14 @@ const FLOATING_PRODUCTS = [
 const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"welcome" | "phone" | "email">("welcome");
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showEmailOtpInput, setShowEmailOtpInput] = useState(false);
+  const [phoneOtp, setPhoneOtp] = useState("");
+  const [emailOtp, setEmailOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isTextVisible, setIsTextVisible] = useState(true);
   const navigate = useNavigate();
@@ -89,21 +92,46 @@ const Login = () => {
     const newUser = await checkUserStatus(phoneNumber);
     setIsNewUser(newUser);
     
-    if (newUser) {
-      // New user - need email verification
+    // Both new and existing users verify phone first
+    setTimeout(() => {
+      setShowOtpInput(true);
       setIsLoading(false);
-      setStep("email");
-    } else {
-      // Existing user - send OTP to phone
-      setTimeout(() => {
-        setShowOtpInput(true);
-        setIsLoading(false);
-        toast({
-          title: "OTP Sent",
-          description: "Check your phone for the verification code",
-        });
-      }, 500);
+      toast({
+        title: "OTP Sent",
+        description: "Check your phone for the verification code",
+      });
+    }, 500);
+  };
+
+  const handleVerifyPhoneOtp = () => {
+    if (phoneOtp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a valid 6-digit OTP",
+        variant: "destructive",
+      });
+      return;
     }
+
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setPhoneVerified(true);
+      
+      if (isNewUser) {
+        // New user - proceed to email verification
+        setShowOtpInput(false);
+        setStep("email");
+        toast({
+          title: "Phone Verified",
+          description: "Now please verify your email",
+        });
+      } else {
+        // Existing user - login complete
+        localStorage.setItem("isAuthenticated", "true");
+        navigate("/home");
+      }
+    }, 1000);
   };
 
   const handleSendEmailOtp = () => {
@@ -118,7 +146,7 @@ const Login = () => {
 
     setIsLoading(true);
     setTimeout(() => {
-      setShowOtpInput(true);
+      setShowEmailOtpInput(true);
       setIsLoading(false);
       toast({
         title: "Code Sent",
@@ -127,8 +155,8 @@ const Login = () => {
     }, 1000);
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.length !== 6) {
+  const handleVerifyEmailOtp = () => {
+    if (emailOtp.length !== 6) {
       toast({
         title: "Invalid OTP",
         description: "Please enter a valid 6-digit OTP",
@@ -146,12 +174,18 @@ const Login = () => {
   };
 
   const handleBack = () => {
-    if (showOtpInput) {
+    if (step === "phone" && showOtpInput) {
       setShowOtpInput(false);
-      setOtp("");
-    } else if (step === "email") {
+      setPhoneOtp("");
+    } else if (step === "email" && showEmailOtpInput) {
+      setShowEmailOtpInput(false);
+      setEmailOtp("");
+    } else if (step === "email" && !showEmailOtpInput) {
       setStep("phone");
+      setShowOtpInput(false);
+      setPhoneOtp("");
       setEmail("");
+      setPhoneVerified(false);
     } else if (step === "phone") {
       setStep("welcome");
       setPhoneNumber("");
@@ -345,9 +379,9 @@ const Login = () => {
                   <Input
                     type="text"
                     placeholder="Enter 6-digit OTP"
-                    value={otp}
+                    value={phoneOtp}
                     onChange={(e) =>
-                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      setPhoneOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     className="h-12 bg-muted/50 border-0 rounded-xl text-xl text-center tracking-[0.3em] placeholder:text-muted-foreground/60 placeholder:tracking-normal placeholder:text-sm"
                     autoFocus
@@ -407,8 +441,8 @@ const Login = () => {
               </Button>
             ) : (
               <Button
-                onClick={handleVerifyOtp}
-                disabled={isLoading || otp.length !== 6}
+                onClick={handleVerifyPhoneOtp}
+                disabled={isLoading || phoneOtp.length !== 6}
                 className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
               >
                 {isLoading ? "Verifying..." : "Verify & Continue"}
@@ -461,12 +495,12 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12 bg-muted/50 border-0 rounded-xl text-base placeholder:text-muted-foreground/60"
                   autoFocus
-                  disabled={showOtpInput}
+                  disabled={showEmailOtpInput}
                 />
               </div>
 
               {/* OTP Input - Shows after email is submitted */}
-              {showOtpInput && (
+              {showEmailOtpInput && (
                 <div className="animate-fade-in pt-2">
                   <label className="text-xs font-medium text-muted-foreground mb-2 block">
                     Verification Code
@@ -474,18 +508,18 @@ const Login = () => {
                   <Input
                     type="text"
                     placeholder="Enter 6-digit code"
-                    value={otp}
+                    value={emailOtp}
                     onChange={(e) =>
-                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      setEmailOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     className="h-12 bg-muted/50 border-0 rounded-xl text-xl text-center tracking-[0.3em] placeholder:text-muted-foreground/60 placeholder:tracking-normal placeholder:text-sm"
                     autoFocus
                   />
                   <button
                     onClick={() => {
-                      setShowOtpInput(false);
+                      setShowEmailOtpInput(false);
                       setTimeout(() => {
-                        setShowOtpInput(true);
+                        setShowEmailOtpInput(true);
                         toast({
                           title: "Code Resent",
                           description: "A new code has been sent to your email",
@@ -501,7 +535,7 @@ const Login = () => {
             </div>
 
             {/* Info for new users */}
-            {!showOtpInput && (
+            {!showEmailOtpInput && (
               <div className="mt-6 animate-fade-in">
                 <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-2xl p-3">
                   <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
@@ -517,7 +551,7 @@ const Login = () => {
           </div>
 
           <div className="pb-8 pt-4">
-            {!showOtpInput ? (
+            {!showEmailOtpInput ? (
               <Button
                 onClick={handleSendEmailOtp}
                 disabled={isLoading || !email || !email.includes("@")}
@@ -527,8 +561,8 @@ const Login = () => {
               </Button>
             ) : (
               <Button
-                onClick={handleVerifyOtp}
-                disabled={isLoading || otp.length !== 6}
+                onClick={handleVerifyEmailOtp}
+                disabled={isLoading || emailOtp.length !== 6}
                 className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
               >
                 {isLoading ? "Verifying..." : "Verify & Continue"}
