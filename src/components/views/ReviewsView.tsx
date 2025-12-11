@@ -146,29 +146,33 @@ const ReviewsView = () => {
                 onClick={() => openOrderSheet(order)}
                 className="bg-card rounded-2xl p-4 cursor-pointer hover:bg-muted/30 transition-all shadow-sm"
               >
-                <div className="flex items-center gap-3">
-                  {/* Brand Logo */}
-                  <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center overflow-hidden shrink-0">
-                    <img 
-                      src={order.brandLogo} 
-                      alt={order.brand}
-                      className="w-7 h-7 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+              <div className="space-y-3">
+                  {/* Top Row - Brand Info & Order ID */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {/* Brand Logo */}
+                      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center overflow-hidden shrink-0">
+                        <img 
+                          src={order.brandLogo} 
+                          alt={order.brand}
+                          className="w-6 h-6 object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-foreground text-sm">{order.brand}</span>
+                        <p className="text-xs text-muted-foreground">Delivered on {order.deliveredDate}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{order.id}</span>
                   </div>
 
-                  {/* Order Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-foreground text-sm">{order.brand}</span>
-                      <span className="text-xs text-muted-foreground">• {order.id}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2">Delivered on {order.deliveredDate}</p>
-                    
+                  {/* Bottom Row - Product Circles & Review Status */}
+                  <div className="flex items-center justify-between">
                     {/* Product Circles */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center">
                       {order.items.slice(0, 4).map((item, index) => (
                         <div 
                           key={index}
@@ -183,21 +187,21 @@ const ReviewsView = () => {
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Review Status & Arrow */}
-                  <div className="flex items-center gap-2">
-                    {allReviewed ? (
-                      <div className="flex items-center gap-1 text-green-600">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="text-xs font-medium">Done</span>
-                      </div>
-                    ) : (
-                      <div className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                        {reviewedCount}/{order.items.length} Reviewed
-                      </div>
-                    )}
-                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    {/* Review Status & Arrow */}
+                    <div className="flex items-center gap-2">
+                      {allReviewed ? (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Star className="w-4 h-4 fill-current" />
+                          <span className="text-xs font-medium">Done</span>
+                        </div>
+                      ) : (
+                        <div className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                          {reviewedCount}/{order.items.length} Reviewed
+                        </div>
+                      )}
+                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    </div>
                   </div>
                 </div>
               </div>
