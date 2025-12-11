@@ -6,6 +6,7 @@
  * - Wishlist Management
  * - Brand Follow/Discovery
  * - Order Tracking
+ * - Brand Discovery
  *
  * Base URL: {{base_url}}/mystique
  *
@@ -14,10 +15,11 @@
  */
 
 // Export all API services
-export { profileApi } from './profileApi';
-export { wishlistApi } from './wishlistApi';
-export { brandFollowApi } from './brandFollowApi';
-export { ordersApi } from './ordersApi';
+export { profileApi } from "./profileApi";
+export { wishlistApi } from "./wishlistApi";
+export { brandFollowApi } from "./brandFollowApi";
+export { ordersApi } from "./ordersApi";
+export { discoverApi } from "./discoverApi";
 
 // Export all types
 export type {
@@ -48,17 +50,24 @@ export type {
   OrderTracking,
   CreateOrderRequest,
   UpdateOrderRequest,
-} from './types';
+
+  // Discover types
+  DiscoverBrand,
+  DiscoverProduct,
+  DiscoverResponse,
+} from "./types";
 
 // Default export for convenience
-import { profileApi } from './profileApi';
-import { wishlistApi } from './wishlistApi';
-import { brandFollowApi } from './brandFollowApi';
-import { ordersApi } from './ordersApi';
+import { profileApi } from "./profileApi";
+import { wishlistApi } from "./wishlistApi";
+import { brandFollowApi } from "./brandFollowApi";
+import { ordersApi } from "./ordersApi";
+import { discoverApi } from "./discoverApi";
 
 export default {
   profile: profileApi,
   wishlist: wishlistApi,
   brandFollow: brandFollowApi,
   orders: ordersApi,
+  discover: discoverApi,
 };

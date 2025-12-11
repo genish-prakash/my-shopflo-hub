@@ -23,6 +23,7 @@ export interface PaginatedResponse<T> {
   size: number;
   total_items: number;
   total_pages: number;
+  has_more?: boolean;
 }
 
 // ============================================
@@ -36,9 +37,9 @@ export interface SizingPreferences {
 }
 
 export interface SkincarePreferences {
-  skin_type?: 'OILY' | 'DRY' | 'COMBINATION' | 'NORMAL' | 'SENSITIVE';
-  skin_undertone?: 'WARM' | 'COOL' | 'NEUTRAL';
-  skin_tone?: 'FAIR' | 'LIGHT' | 'MEDIUM' | 'OLIVE' | 'BROWN' | 'DARK';
+  skin_type?: "OILY" | "DRY" | "COMBINATION" | "NORMAL" | "SENSITIVE";
+  skin_undertone?: "WARM" | "COOL" | "NEUTRAL";
+  skin_tone?: "FAIR" | "LIGHT" | "MEDIUM" | "OLIVE" | "BROWN" | "DARK";
 }
 
 export interface MarketingPreferences {
@@ -55,7 +56,7 @@ export interface Profile {
   email: string;
   first_name: string;
   last_name: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  gender: "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
   birthday?: string;
   profile_image_url?: string;
   sizing_preferences?: SizingPreferences;
@@ -71,7 +72,7 @@ export interface CreateProfileRequest {
   email: string;
   first_name: string;
   last_name: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  gender: "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
   birthday?: string;
   profile_image_url?: string;
   sizing_preferences?: SizingPreferences;
@@ -83,7 +84,7 @@ export interface UpdateProfileRequest {
   email?: string;
   first_name?: string;
   last_name?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  gender?: "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY";
   birthday?: string;
   profile_image_url?: string;
   sizing_preferences?: SizingPreferences;
@@ -169,6 +170,7 @@ export interface Order {
   is_draft_order?: boolean;
   created_at: number;
   tracking?: OrderTracking;
+  has_more?: boolean;
 }
 
 export interface OrderDetails extends Order {
@@ -194,4 +196,43 @@ export interface UpdateOrderRequest {
   status?: string;
   amount?: number;
   tracking?: OrderTracking;
+}
+
+// ============================================
+// Discover Types
+// ============================================
+
+export interface DiscoverProduct {
+  id: string;
+  name: string;
+  price: number;
+  original_price: number | null;
+  image: string;
+  in_stock: boolean;
+  is_on_sale: boolean;
+  created_at?: number;
+  sales_count?: number | null;
+}
+
+export interface DiscoverBrand {
+  id: string;
+  merchant_id: string;
+  name: string;
+  logo: string;
+  color: string;
+  tagline: string;
+  category: string;
+  is_followed: boolean;
+  is_sponsored: boolean;
+  follower_count: number;
+  products: DiscoverProduct[];
+}
+
+export interface DiscoverResponse {
+  brands: DiscoverBrand[];
+  categories: string[];
+  total_brands: number;
+  current_page: number;
+  total_pages: number;
+  has_more: boolean;
 }
