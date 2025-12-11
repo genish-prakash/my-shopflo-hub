@@ -2,6 +2,7 @@ import { User, SlidersHorizontal, MapPin, Shield, Bell, LogOut, ChevronRight } f
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { logout } from "@/lib/auth";
 import wanderLogo from "@/assets/wander-logo.png";
 
 const Account = () => {
@@ -9,12 +10,14 @@ const Account = () => {
   const { toast } = useToast();
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    navigate("/");
     toast({
       title: "Logged out successfully",
       description: "See you again soon!",
     });
+    // Clear auth cookies and redirect to login
+    setTimeout(() => {
+      logout();
+    }, 500);
   };
 
   const menuItems = [

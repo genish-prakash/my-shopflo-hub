@@ -1,55 +1,199 @@
-import { useState } from "react";
-import { Heart, Plus, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Heart, Plus, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { mockBrands, Brand, Product } from "@/data/brands";
 import ProductDetailSheet from "@/components/ProductDetailSheet";
+import { discoverApi, brandFollowApi, wishlistApi } from "@/services/mystique";
+import WishlistView from "./WishlistView";
+import type {
+  DiscoverBrand,
+  DiscoverProduct,
+  WishlistItem,
+  FollowedBrand,
+} from "@/services/mystique/types";
 
 type FilterType = "all" | "following" | "wishlisted";
 
 const BrandsView = () => {
   const navigate = useNavigate();
-  const [brands, setBrands] = useState<Brand[]>(mockBrands);
+  const [brands, setBrands] = useState<DiscoverBrand[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]); // Keep for toggle logic if needed, or refactor
+  const [followedBrands, setFollowedBrands] = useState<FollowedBrand[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-  const toggleFollow = (e: React.MouseEvent, brandId: string) => {
-    e.stopPropagation();
-    setBrands(brands.map(brand => 
-      brand.id === brandId ? { ...brand, isFollowed: !brand.isFollowed } : brand
-    ));
+  console.log(brands)
+
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  const lastBrandElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
+
+  const fetchBrands = async () => {
+    setLoading(true);
+    try {
+      const response = await discoverApi.getDiscoverBrands(page, 10);
+      setBrands((prev) => {
+        // Filter out duplicates based on ID
+        const newBrands = response.brands.filter(
+          (newBrand) =>
+            !prev.some((existingBrand) => existingBrand.id === newBrand.id)
+        );
+        return [...prev, ...newBrands];
+      });
+      setHasMore(response.has_more);
+    } catch (error) {
+      console.error("Failed to fetch brands", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleWishlist = (e: React.MouseEvent, brandId: string, productId: string) => {
+  useEffect(() => {
+    fetchBrands();
+  }, [page]);
+
+  // Wishlist fetching moved to WishlistView, but we might need to know wishlist state for the heart icon on brands
+  // For now, we'll fetch it here too if we want to sync, or just rely on local toggle updates.
+  // To keep it simple and avoid double fetching, let's remove the fetch here if it's only for the view.
+  // However, toggleWishlist uses wishlistItems to check existence.
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      // We fetch this to know what is wishlisted for the toggle logic
+      try {
+        const items = await wishlistApi.getAllWishlist();
+        setWishlistItems(items);
+      } catch (error) {
+        console.error("Failed to fetch wishlist", error);
+      }
+    };
+    fetchWishlist();
+  }, []); // Fetch once on mount to populate state
+
+  useEffect(() => {
+    const fetchFollowed = async () => {
+      if (activeFilter === "following") {
+        try {
+          const items = await brandFollowApi.getAllFollowedBrands();
+          setFollowedBrands(items);
+        } catch (error) {
+          console.error("Failed to fetch followed brands", error);
+        }
+      }
+    };
+    fetchFollowed();
+  }, [activeFilter]);
+
+  const toggleFollow = async (e: React.MouseEvent, brandId: string) => {
     e.stopPropagation();
-    setBrands(brands.map(brand => 
-      brand.id === brandId 
-        ? {
-            ...brand,
-            products: brand.products.map(product =>
-              product.id === productId 
-                ? { ...product, isWishlisted: !product.isWishlisted }
-                : product
-            )
-          }
-        : brand
-    ));
+    const brand = brands.find((b) => b.id === brandId);
+    if (!brand) return;
+
+    // Optimistic update
+    setBrands(
+      brands.map((b) =>
+        b.id === brandId ? { ...b, is_followed: !b.is_followed } : b
+      )
+    );
+
+    try {
+      if (brand.is_followed) {
+        await brandFollowApi.unfollowBrand(brand.merchant_id);
+      } else {
+        await brandFollowApi.followBrand({
+          merchant_id: brand.merchant_id,
+          brand_name: brand.name,
+          brand_logo_url: brand.logo,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to toggle follow", error);
+      // Revert optimistic update
+      setBrands(
+        brands.map((b) =>
+          b.id === brandId ? { ...b, is_followed: brand.is_followed } : b
+        )
+      );
+    }
+  };
+
+  const toggleWishlist = async (
+    e: React.MouseEvent,
+    brandId: string,
+    productId: string
+  ) => {
+    e.stopPropagation();
+
+    // Find the product and brand
+    const brand = brands.find((b) => b.id === brandId);
+    const product = brand?.products.find((p) => p.id === productId);
+
+    if (!brand || !product) return;
+
+    try {
+      // We need a variant ID, but DiscoverProduct doesn't have it.
+      // We'll use product ID as variant ID for now or a placeholder
+      const variantId = product.id;
+
+      // Check if item is already in wishlistItems to determine action
+      const existingItem = wishlistItems.find(
+        (item) => item.product_id === product.id
+      );
+
+      if (existingItem) {
+        await wishlistApi.removeFromWishlist(
+          existingItem.merchant_id,
+          existingItem.variant_id
+        );
+        setWishlistItems((prev) =>
+          prev.filter((item) => item.product_id !== product.id)
+        );
+      } else {
+        await wishlistApi.addToWishlist({
+          merchant_id: brand.merchant_id,
+          product_id: product.id,
+          variant_id: variantId,
+          product_title: product.name,
+          variant_title: "Default", // Placeholder
+          product_image_url: product.image || "",
+          price: product.price,
+          compare_at_price: product.original_price || undefined,
+          currency: "INR",
+        });
+        // Refresh wishlist to get the new item with correct ID
+        // We update local state to reflect change immediately for other toggles
+        const newItem = await wishlistApi.getAllWishlist(); // Or just add optimistic
+        setWishlistItems(newItem);
+      }
+    } catch (error) {
+      console.error("Failed to toggle wishlist", error);
+    }
   };
 
   const getFilteredContent = () => {
     if (activeFilter === "following") {
-      return brands.filter(brand => brand.isFollowed);
+      // Return empty array here as we handle rendering separately for followed brands
+      return [];
     }
     if (activeFilter === "wishlisted") {
-      const wishlistedProducts: { brand: Brand; product: Product }[] = [];
-      brands.forEach(brand => {
-        brand.products.forEach(product => {
-          if (product.isWishlisted) {
-            wishlistedProducts.push({ brand, product });
-          }
-        });
-      });
-      return wishlistedProducts;
+      // Since we don't have wishlist status in the DiscoverProduct type yet,
+      // we'll just return empty or implement when available.
+      // For now returning empty to avoid errors
+      return [];
     }
     return brands;
   };
@@ -60,35 +204,37 @@ const BrandsView = () => {
     navigate(`/brand/${brandId}`);
   };
 
-  const openProductDetail = (brand: Brand, product: Product) => {
+  const openProductDetail = (
+    brand: DiscoverBrand,
+    product: DiscoverProduct
+  ) => {
     setSelectedProduct({
       id: product.id,
       name: product.name,
       price: product.price,
-      originalPrice: product.originalPrice,
-      images: [product.image, product.image, product.image],
+      originalPrice: product.original_price,
+      images: [product.image],
       brand: {
         name: brand.name,
         logo: brand.logo,
         color: brand.color,
-        website: `https://${brand.name.toLowerCase().replace(/\s+/g, '')}.com`,
+        website: "", // Not available in API
       },
-      description: `Premium ${product.name.toLowerCase()} from ${brand.name}. High quality materials and excellent craftsmanship.`,
-      variants: [
-        { id: "s", name: "S", available: true },
-        { id: "m", name: "M", available: true },
-        { id: "l", name: "L", available: false },
-        { id: "xl", name: "XL", available: true },
-      ],
-      isWishlisted: product.isWishlisted,
+      description: `Premium ${product.name} from ${brand.name}.`,
+      variants: [], // Not available in API
+      isWishlisted: false, // Not available in API
     });
   };
 
   return (
     <div className="px-4 pt-6 pb-24">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Discover Brands</h1>
-        <p className="text-sm text-muted-foreground">Your favourite Indian D2C brands</p>
+        <h1 className="text-2xl font-bold text-foreground mb-1">
+          Discover Brands
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Your favourite Indian D2C brands
+        </p>
       </div>
 
       {/* Filter Tabs */}
@@ -112,40 +258,59 @@ const BrandsView = () => {
         ))}
       </div>
 
-      {/* Wishlisted Products View */}
-      {activeFilter === "wishlisted" && (
+      {/* Followed Brands View */}
+      {activeFilter === "following" && (
         <div className="space-y-4">
-          {(filteredContent as { brand: Brand; product: Product }[]).length === 0 ? (
+          {followedBrands.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              No wishlisted products yet
+              No followed brands yet
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {(filteredContent as { brand: Brand; product: Product }[]).map(({ brand, product }) => (
+            <div className="grid grid-cols-2 gap-4">
+              {followedBrands.map((brand) => (
                 <div
-                  key={product.id}
-                  onClick={() => openProductDetail(brand, product)}
-                  className="relative bg-card rounded-2xl p-3 shadow-sm cursor-pointer transition-transform hover:scale-[1.02]"
-                  style={{
-                    background: `linear-gradient(135deg, ${brand.color}10 0%, ${brand.color}05 100%)`,
-                  }}
+                  key={brand.id}
+                  className="bg-card rounded-xl shadow-card hover:shadow-card-hover transition-smooth p-4 flex flex-col items-center text-center space-y-3 cursor-pointer"
+                  onClick={() => navigateToBrand(brand.merchant_id)}
                 >
-                  <span className="text-xs font-semibold text-foreground">
-                    ₹{product.price.toLocaleString()}
-                  </span>
-                  <div className="flex items-center justify-center text-4xl py-6">
-                    {product.image}
+                  <div className="h-20 w-20 rounded-2xl bg-secondary flex items-center justify-center overflow-hidden">
+                    {brand.brand_logo_url ? (
+                      <img
+                        src={brand.brand_logo_url}
+                        alt={brand.brand_name}
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-2xl">
+                        {brand.brand_name.charAt(0)}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[10px] text-muted-foreground/70">{brand.name}</p>
-                  <button
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1">
+                      {brand.brand_name}
+                    </h3>
+                  </div>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-full h-8 text-xs"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleWishlist(e, brand.id, product.id);
+                      // Optimistic update
+                      setFollowedBrands((prev) =>
+                        prev.filter((b) => b.id !== brand.id)
+                      );
+                      brandFollowApi
+                        .unfollowBrand(brand.merchant_id)
+                        .catch(() => {
+                          // Revert if failed
+                          setFollowedBrands((prev) => [...prev, brand]);
+                        });
                     }}
-                    className="absolute bottom-3 right-3 p-1"
                   >
-                    <Heart className="w-5 h-5 fill-red-500 text-red-500" />
-                  </button>
+                    Following
+                  </Button>
                 </div>
               ))}
             </div>
@@ -153,123 +318,151 @@ const BrandsView = () => {
         </div>
       )}
 
-      {/* Brands View */}
-      {activeFilter !== "wishlisted" && (
+      {/* Wishlisted Products View */}
+      {activeFilter === "wishlisted" && (
+        <div className="space-y-4">
+          <WishlistView />
+        </div>
+      )}
+
+      {/* Brands View (All) */}
+      {activeFilter === "all" && (
         <div className="space-y-6">
-          {(filteredContent as Brand[]).length === 0 ? (
+          {(filteredContent as DiscoverBrand[]).length === 0 && !loading ? (
             <div className="text-center py-12 text-muted-foreground">
-              No followed brands yet
+              No brands found
             </div>
           ) : (
-            (filteredContent as Brand[]).map((brand) => (
-              <div
-                key={brand.id}
-                className="rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-[1.01]"
-                style={{
-                  background: `linear-gradient(135deg, ${brand.color}12 0%, ${brand.color}06 100%)`,
-                }}
-                onClick={() => navigateToBrand(brand.id)}
-              >
-                {/* Header with Logo and Follow */}
-                <div className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={brand.logo} 
-                      alt={brand.name}
-                      className="w-8 h-8 object-contain rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <h2 className="text-lg font-bold text-foreground">{brand.name}</h2>
-                  </div>
-                  <Button
-                    variant={brand.isFollowed ? "default" : "outline"}
-                    size="sm"
-                    className={`rounded-full px-4 h-8 text-xs font-medium ${
-                      brand.isFollowed
-                        ? "bg-foreground text-background hover:bg-foreground/90"
-                        : "border-foreground/30 hover:bg-foreground/10"
-                    }`}
-                    onClick={(e) => toggleFollow(e, brand.id)}
-                  >
-                    {brand.isFollowed ? (
-                      <>Following</>
-                    ) : (
-                      <>
-                        <Plus className="w-3 h-3 mr-1" />
-                        Follow
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Products Grid - 2x2 - No product names */}
-                <div className="px-4 pb-2">
-                  <div className="grid grid-cols-2 gap-3">
-                    {brand.products.slice(0, 4).map((product) => (
-                      <div
-                        key={product.id}
-                        className="relative bg-white/90 backdrop-blur-sm rounded-xl p-3 aspect-square flex flex-col"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openProductDetail(brand, product);
-                        }}
-                      >
-                        {/* Price - Top Left */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm font-semibold text-foreground">
-                            ₹{product.price.toLocaleString()}
-                          </span>
-                          {product.originalPrice && (
-                            <span className="text-xs text-muted-foreground line-through">
-                              ₹{product.originalPrice.toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Product Icon */}
-                        <div className="flex-1 flex items-center justify-center text-4xl">
-                          {product.image}
-                        </div>
-
-                        {/* Wishlist - Bottom Right */}
-                        <button
-                          onClick={(e) => toggleWishlist(e, brand.id, product.id)}
-                          className="absolute bottom-3 right-3 p-1"
-                        >
-                          <Heart
-                            className={`w-5 h-5 transition-all ${
-                              product.isWishlisted
-                                ? "fill-red-500 text-red-500"
-                                : "text-muted-foreground hover:text-red-400"
-                            }`}
-                          />
-                        </button>
+            (filteredContent as DiscoverBrand[]).map((brand, index) => {
+              const isLastElement =
+                index === (filteredContent as DiscoverBrand[]).length - 1;
+              return (
+                <div
+                  key={brand.id}
+                  ref={isLastElement ? lastBrandElementRef : null}
+                  className="rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-[1.01]"
+                  style={{
+                    background: `linear-gradient(135deg, ${brand.color}12 0%, ${brand.color}06 100%)`,
+                  }}
+                  onClick={() => navigateToBrand(brand.merchant_id)}
+                >
+                  {/* Header with Logo and Follow */}
+                  <div className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg overflow-hidden bg-white">
+                        <img
+                          src={brand.logo}
+                          alt={brand.name}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
                       </div>
-                    ))}
+                      <h2 className="text-lg font-bold text-foreground">
+                        {brand.name}
+                      </h2>
+                    </div>
+                    <Button
+                      variant={brand.is_followed ? "default" : "outline"}
+                      size="sm"
+                      className={`rounded-full px-4 h-8 text-xs font-medium ${
+                        brand.is_followed
+                          ? "bg-foreground text-background hover:bg-foreground/90"
+                          : "border-foreground/30 hover:bg-foreground/10"
+                      }`}
+                      onClick={(e) => toggleFollow(e, brand.id)}
+                    >
+                      {brand.is_followed ? (
+                        <>Following</>
+                      ) : (
+                        <>
+                          <Plus className="w-3 h-3 mr-1" />
+                          Follow
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Products Grid - 2x2 - No product names */}
+                  <div className="px-4 pb-2">
+                    <div className="grid grid-cols-2 gap-3">
+                      {brand.products.slice(0, 4).map((product) => (
+                        <div
+                          key={product.id}
+                          className="relative bg-white/90 backdrop-blur-sm rounded-xl p-3 aspect-square flex flex-col"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openProductDetail(brand, product);
+                          }}
+                        >
+                          {/* Price - Top Left */}
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-semibold text-foreground">
+                              ₹{product.price.toLocaleString()}
+                            </span>
+                            {product.original_price && (
+                              <span className="text-xs text-muted-foreground line-through">
+                                ₹{product.original_price.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Product Icon */}
+                          <div className="flex-1 flex items-center justify-center overflow-hidden my-2">
+                            {product.image ? (
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="h-full w-full object-contain"
+                              />
+                            ) : (
+                              <span className="text-4xl">🛍️</span>
+                            )}
+                          </div>
+
+                          {/* Wishlist - Bottom Right */}
+                          <button
+                            onClick={(e) =>
+                              toggleWishlist(e, brand.id, product.id)
+                            }
+                            className="absolute bottom-3 right-3 p-1"
+                          >
+                            <Heart
+                              className={`w-5 h-5 transition-all text-muted-foreground hover:text-red-400`}
+                            />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Shop All CTA - Blurred */}
+                  <div className="p-4 pt-2">
+                    <Button
+                      className="w-full rounded-full h-10 font-medium text-sm backdrop-blur-md border border-white/30"
+                      style={{
+                        backgroundColor: `${brand.color}90`,
+                        color: "white",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToBrand(brand.id);
+                      }}
+                    >
+                      Shop All
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
                   </div>
                 </div>
+              );
+            })
+          )}
 
-                {/* Shop All CTA - Blurred */}
-                <div className="p-4 pt-2">
-                  <Button
-                    className="w-full rounded-full h-10 font-medium text-sm backdrop-blur-md border border-white/30"
-                    style={{
-                      backgroundColor: `${brand.color}90`,
-                      color: 'white',
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateToBrand(brand.id);
-                    }}
-                  >
-                    Shop All
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-              </div>
-            ))
+          {loading && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
           )}
         </div>
       )}
@@ -280,14 +473,8 @@ const BrandsView = () => {
         onClose={() => setSelectedProduct(null)}
         product={selectedProduct}
         onToggleWishlist={(id) => {
-          // Find and toggle the product
-          brands.forEach(brand => {
-            const product = brand.products.find(p => p.id === id);
-            if (product) {
-              toggleWishlist({ stopPropagation: () => {} } as React.MouseEvent, brand.id, id);
-            }
-          });
-          setSelectedProduct(null);
+          // TODO: Implement wishlist toggle
+          console.log("Toggle wishlist from sheet", id);
         }}
       />
     </div>
