@@ -1,12 +1,24 @@
-import { ArrowLeft, LogOut, Phone, Mail, User } from "lucide-react";
+import { ArrowLeft, LogOut, Phone, Mail, Edit2, Check, X } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useUser } from "@/contexts/UserContext";
+import { getUserDisplayName } from "@/lib/userUtils";
+import { shopfloAuthApi } from "@/services/authApi";
+import UserAvatar from "@/components/common/UserAvatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, refreshUser } = useUser();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  const hasNames = user?.first_name || user?.last_name;
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -15,6 +27,62 @@ const Profile = () => {
       title: "Logged out successfully",
       description: "See you again soon!",
     });
+  };
+
+  const handleEdit = () => {
+    setFirstName(user?.first_name || "");
+    setLastName(user?.last_name || "");
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setFirstName("");
+    setLastName("");
+  };
+
+  const handleSave = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "User ID not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!firstName.trim()) {
+      toast({
+        title: "Error",
+        description: "First name is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await shopfloAuthApi.updateProfile(user.id, {
+        first_name: firstName.trim(),
+        last_name: lastName.trim() || undefined,
+      });
+
+      await refreshUser();
+      setIsEditing(false);
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update profile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,12 +100,45 @@ const Profile = () => {
       {/* Profile Header */}
       <div className="bg-card px-4 py-8">
         <div className="flex flex-col items-center text-center">
-          <Avatar className="w-20 h-20 mb-4">
-            <AvatarFallback className="bg-neutral-200 text-neutral-600 text-2xl font-semibold">
-              <User className="w-10 h-10" />
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="text-xl font-bold text-foreground mb-1">Rahul Kumar</h1>
+          <UserAvatar size="xl" className="mb-4" />
+
+          {!hasNames || isEditing ? (
+            <div className="w-full max-w-sm space-y-3">
+              <Input
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                disabled={isLoading}
+              />
+              <Input
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                disabled={isLoading}
+              />
+              <div className="flex gap-2 justify-center">
+                <Button onClick={handleSave} disabled={isLoading}>
+                  <Check className="h-4 w-4 mr-2" />
+                  {isLoading ? "Saving..." : "Save"}
+                </Button>
+                {hasNames && (
+                  <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-foreground mb-1">
+                {getUserDisplayName(user)}
+              </h1>
+              <Button size="icon" variant="ghost" onClick={handleEdit}>
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -48,25 +149,29 @@ const Profile = () => {
         </div>
         
         <div className="divide-y divide-border">
-          <div className="flex items-center gap-4 px-4 py-4">
-            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-              <Mail className="h-5 w-5 text-neutral-500" />
+          {user?.email && (
+            <div className="flex items-center gap-4 px-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-neutral-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                <p className="text-sm font-medium text-foreground">{user.email}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-              <p className="text-sm font-medium text-foreground">rahul.kumar@email.com</p>
-            </div>
-          </div>
+          )}
 
-          <div className="flex items-center gap-4 px-4 py-4">
-            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-              <Phone className="h-5 w-5 text-neutral-500" />
+          {user?.phone_number && (
+            <div className="flex items-center gap-4 px-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                <Phone className="h-5 w-5 text-neutral-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                <p className="text-sm font-medium text-foreground">{user.phone_number}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
-              <p className="text-sm font-medium text-foreground">+91 98765 43210</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

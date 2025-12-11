@@ -356,7 +356,7 @@ const OrdersView = () => {
                   <img
                     src={order.brandLogo}
                     alt={order.shopName}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.src =
                         "https://placehold.co/100x100/e2e8f0/64748b?text=Shop";

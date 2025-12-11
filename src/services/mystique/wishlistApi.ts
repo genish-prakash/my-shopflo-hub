@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { authenticatedApi } from '../authenticatedApi';
+import { authenticatedApi } from "../authenticatedApi";
 import type {
   ApiResponse,
   PaginatedResponse,
   WishlistItem,
   AddToWishlistRequest,
-} from './types';
+} from "./types";
 
-const BASE_PATH = '/mystique/api/v1/wishlist';
+const BASE_PATH = "/wishlist";
 
 /**
  * Wishlist API Service
@@ -29,10 +29,9 @@ export const wishlistApi = {
     const params: any = { page, size };
     if (merchantId) params.merchantId = merchantId;
 
-    const response = await authenticatedApi.get<ApiResponse<PaginatedResponse<WishlistItem>>>(
-      BASE_PATH,
-      { params }
-    );
+    const response = await authenticatedApi.get<
+      ApiResponse<PaginatedResponse<WishlistItem>>
+    >(BASE_PATH, { params });
     return response.data;
   },
 
@@ -57,7 +56,10 @@ export const wishlistApi = {
    * POST /mystique/api/v1/wishlist
    */
   addToWishlist: async (data: AddToWishlistRequest): Promise<WishlistItem> => {
-    const response = await authenticatedApi.post<ApiResponse<WishlistItem>>(BASE_PATH, data);
+    const response = await authenticatedApi.post<ApiResponse<WishlistItem>>(
+      BASE_PATH,
+      data
+    );
     return response.data;
   },
 
@@ -65,7 +67,10 @@ export const wishlistApi = {
    * Remove a product variant from the wishlist
    * DELETE /mystique/api/v1/wishlist/:merchantId/:variantId
    */
-  removeFromWishlist: async (merchantId: string, variantId: string): Promise<boolean> => {
+  removeFromWishlist: async (
+    merchantId: string,
+    variantId: string
+  ): Promise<boolean> => {
     const response = await authenticatedApi.delete<ApiResponse<boolean>>(
       `${BASE_PATH}/${merchantId}/${variantId}`
     );
@@ -76,7 +81,10 @@ export const wishlistApi = {
    * Check if a product variant is in the wishlist
    * GET /mystique/api/v1/wishlist/check/:merchantId/:variantId
    */
-  checkInWishlist: async (merchantId: string, variantId: string): Promise<boolean> => {
+  checkInWishlist: async (
+    merchantId: string,
+    variantId: string
+  ): Promise<boolean> => {
     const response = await authenticatedApi.get<ApiResponse<boolean>>(
       `${BASE_PATH}/check/${merchantId}/${variantId}`
     );

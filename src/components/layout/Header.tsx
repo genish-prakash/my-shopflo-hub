@@ -1,7 +1,7 @@
-import { User, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ViewType } from "@/pages/Home";
+import UserAvatar from "@/components/common/UserAvatar";
 import wanderLogo from "@/assets/wander-logo.png";
 
 interface HeaderProps {
@@ -36,11 +36,10 @@ const Header = ({ onViewChange }: HeaderProps) => {
             onClick={() => navigate('/account')}
             className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full"
           >
-            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-neutral-200 hover:ring-neutral-300 transition-all">
-              <AvatarFallback className="bg-neutral-200 text-neutral-600 font-semibold text-xs">
-                RK
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              size="sm"
+              className="cursor-pointer ring-2 ring-neutral-200 hover:ring-neutral-300 transition-all"
+            />
           </button>
         </div>
       </div>

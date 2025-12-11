@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { authenticatedApi } from '../authenticatedApi';
+import { authenticatedApi } from "../authenticatedApi";
 import type {
   ApiResponse,
   PaginatedResponse,
@@ -7,9 +7,9 @@ import type {
   OrderDetails,
   CreateOrderRequest,
   UpdateOrderRequest,
-} from './types';
+} from "./types";
 
-const BASE_PATH = '/mystique/api/v1/orders';
+const BASE_PATH = "/orders";
 
 /**
  * Orders API Service
@@ -31,10 +31,9 @@ export const ordersApi = {
     const params: any = { page, size };
     if (merchantId) params.merchantId = merchantId;
 
-    const response = await authenticatedApi.get<ApiResponse<PaginatedResponse<Order>>>(
-      BASE_PATH,
-      { params }
-    );
+    const response = await authenticatedApi.get<
+      ApiResponse<PaginatedResponse<Order>>
+    >(BASE_PATH, { params });
     return response.data;
   },
 
@@ -70,7 +69,10 @@ export const ordersApi = {
    * POST /mystique/api/v1/orders
    */
   createOrder: async (data: CreateOrderRequest): Promise<Order> => {
-    const response = await authenticatedApi.post<ApiResponse<Order>>(BASE_PATH, data);
+    const response = await authenticatedApi.post<ApiResponse<Order>>(
+      BASE_PATH,
+      data
+    );
     return response.data;
   },
 
@@ -78,7 +80,10 @@ export const ordersApi = {
    * Update an existing order
    * PUT /mystique/api/v1/orders/:uid
    */
-  updateOrder: async (uid: string, data: UpdateOrderRequest): Promise<Order> => {
+  updateOrder: async (
+    uid: string,
+    data: UpdateOrderRequest
+  ): Promise<Order> => {
     const response = await authenticatedApi.put<ApiResponse<Order>>(
       `${BASE_PATH}/${uid}`,
       data
@@ -125,10 +130,9 @@ export const ordersApi = {
     page: number = 0,
     size: number = 20
   ): Promise<PaginatedResponse<Order>> => {
-    const response = await authenticatedApi.get<ApiResponse<PaginatedResponse<Order>>>(
-      `${BASE_PATH}/search`,
-      { params: { query, page, size } }
-    );
+    const response = await authenticatedApi.get<
+      ApiResponse<PaginatedResponse<Order>>
+    >(`${BASE_PATH}/search`, { params: { query, page, size } });
     return response.data;
   },
 
@@ -144,10 +148,9 @@ export const ordersApi = {
     page: number = 0,
     size: number = 20
   ): Promise<PaginatedResponse<Order>> => {
-    const response = await authenticatedApi.get<ApiResponse<PaginatedResponse<Order>>>(
-      `${BASE_PATH}/status/${status}`,
-      { params: { page, size } }
-    );
+    const response = await authenticatedApi.get<
+      ApiResponse<PaginatedResponse<Order>>
+    >(`${BASE_PATH}/status/${status}`, { params: { page, size } });
     return response.data;
   },
 };

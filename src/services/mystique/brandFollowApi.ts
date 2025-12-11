@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { authenticatedApi } from '../authenticatedApi';
-import axios from 'axios';
+import { authenticatedApi } from "../authenticatedApi";
+import axios from "axios";
 import type {
   ApiResponse,
   PaginatedResponse,
   FollowedBrand,
   FollowBrandRequest,
-} from './types';
+} from "./types";
 
-const BASE_PATH = '/mystique/api/v1/brands/follow';
+const BASE_PATH = "/brands/follow";
 
 // For public endpoints (like brand followers count)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://your-ngrok-url.ngrok.io/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://your-ngrok-url.ngrok.io/api/v1";
 
 /**
  * Brand Follow API Service
@@ -29,10 +30,9 @@ export const brandFollowApi = {
     page: number = 0,
     size: number = 20
   ): Promise<PaginatedResponse<FollowedBrand>> => {
-    const response = await authenticatedApi.get<ApiResponse<PaginatedResponse<FollowedBrand>>>(
-      BASE_PATH,
-      { params: { page, size } }
-    );
+    const response = await authenticatedApi.get<
+      ApiResponse<PaginatedResponse<FollowedBrand>>
+    >(BASE_PATH, { params: { page, size } });
     return response.data;
   },
 
@@ -52,7 +52,10 @@ export const brandFollowApi = {
    * POST /mystique/api/v1/brands/follow
    */
   followBrand: async (data: FollowBrandRequest): Promise<FollowedBrand> => {
-    const response = await authenticatedApi.post<ApiResponse<FollowedBrand>>(BASE_PATH, data);
+    const response = await authenticatedApi.post<ApiResponse<FollowedBrand>>(
+      BASE_PATH,
+      data
+    );
     return response.data;
   },
 

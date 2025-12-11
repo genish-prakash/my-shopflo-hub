@@ -1,10 +1,13 @@
-import { LogOut, Phone, Mail, User } from "lucide-react";
+import { LogOut, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useUser } from "@/contexts/UserContext";
+import { getUserDisplayName } from "@/lib/userUtils";
+import UserAvatar from "@/components/common/UserAvatar";
 import { logout } from "@/lib/auth";
 
 const ProfileView = () => {
   const { toast } = useToast();
+  const { user } = useUser();
 
   const handleLogout = () => {
     toast({
@@ -22,12 +25,10 @@ const ProfileView = () => {
       {/* Profile Header */}
       <div className="bg-card px-4 py-8">
         <div className="flex flex-col items-center text-center">
-          <Avatar className="w-20 h-20 mb-4">
-            <AvatarFallback className="bg-neutral-200 text-neutral-600 text-2xl font-semibold">
-              <User className="w-10 h-10" />
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="text-xl font-bold text-foreground mb-1">Rahul Kumar</h1>
+          <UserAvatar size="xl" className="mb-4" />
+          <h1 className="text-xl font-bold text-foreground mb-1">
+            {getUserDisplayName(user)}
+          </h1>
         </div>
       </div>
 
@@ -38,25 +39,29 @@ const ProfileView = () => {
         </div>
         
         <div className="divide-y divide-border">
-          <div className="flex items-center gap-4 px-4 py-4">
-            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-              <Mail className="h-5 w-5 text-neutral-500" />
+          {user?.email && (
+            <div className="flex items-center gap-4 px-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-neutral-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                <p className="text-sm font-medium text-foreground">{user.email}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-              <p className="text-sm font-medium text-foreground">rahul.kumar@email.com</p>
-            </div>
-          </div>
+          )}
 
-          <div className="flex items-center gap-4 px-4 py-4">
-            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-              <Phone className="h-5 w-5 text-neutral-500" />
+          {user?.phone_number && (
+            <div className="flex items-center gap-4 px-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
+                <Phone className="h-5 w-5 text-neutral-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                <p className="text-sm font-medium text-foreground">{user.phone_number}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
-              <p className="text-sm font-medium text-foreground">+91 98765 43210</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

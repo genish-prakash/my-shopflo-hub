@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { authenticatedApi } from '../authenticatedApi';
+import { authenticatedApi } from "../authenticatedApi";
 import type {
   ApiResponse,
   Profile,
   CreateProfileRequest,
   UpdateProfileRequest,
-} from './types';
+} from "./types";
 
-const BASE_PATH = '/mystique/api/v1/profile';
+const BASE_PATH = "/profile";
 
 /**
  * Profile API Service
@@ -19,7 +19,9 @@ export const profileApi = {
    * GET /mystique/api/v1/profile
    */
   getProfile: async (): Promise<Profile> => {
-    const response = await authenticatedApi.get<ApiResponse<Profile>>(BASE_PATH);
+    const response = await authenticatedApi.get<ApiResponse<Profile>>(
+      BASE_PATH
+    );
     return response.data;
   },
 
@@ -28,7 +30,10 @@ export const profileApi = {
    * POST /mystique/api/v1/profile
    */
   createProfile: async (data: CreateProfileRequest): Promise<Profile> => {
-    const response = await authenticatedApi.post<ApiResponse<Profile>>(BASE_PATH, data);
+    const response = await authenticatedApi.post<ApiResponse<Profile>>(
+      BASE_PATH,
+      data
+    );
     return response.data;
   },
 
@@ -37,7 +42,10 @@ export const profileApi = {
    * PUT /mystique/api/v1/profile
    */
   updateProfile: async (data: UpdateProfileRequest): Promise<Profile> => {
-    const response = await authenticatedApi.put<ApiResponse<Profile>>(BASE_PATH, data);
+    const response = await authenticatedApi.put<ApiResponse<Profile>>(
+      BASE_PATH,
+      data
+    );
     return response.data;
   },
 
@@ -46,7 +54,9 @@ export const profileApi = {
    * DELETE /mystique/api/v1/profile
    */
   deleteProfile: async (): Promise<boolean> => {
-    const response = await authenticatedApi.delete<ApiResponse<boolean>>(BASE_PATH);
+    const response = await authenticatedApi.delete<ApiResponse<boolean>>(
+      BASE_PATH
+    );
     return response.data;
   },
 
@@ -55,7 +65,9 @@ export const profileApi = {
    * GET /mystique/api/v1/profile/exists
    */
   checkProfileExists: async (): Promise<boolean> => {
-    const response = await authenticatedApi.get<ApiResponse<boolean>>(`${BASE_PATH}/exists`);
+    const response = await authenticatedApi.get<ApiResponse<boolean>>(
+      `${BASE_PATH}/exists`
+    );
     return response.data;
   },
 };

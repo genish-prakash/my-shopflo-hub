@@ -2,7 +2,7 @@
 import { authenticatedApi } from "../authenticatedApi";
 import type { ApiResponse, DiscoverResponse, DiscoverBrand } from "./types";
 
-const BASE_PATH = "/mystique/api/v1/discover";
+const BASE_PATH = "/discover";
 
 /**
  * Discover API Service

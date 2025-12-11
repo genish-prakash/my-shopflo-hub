@@ -54,6 +54,7 @@ const Login = () => {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isTextVisible, setIsTextVisible] = useState(true);
   const [contextId, setContextId] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -142,8 +143,33 @@ const Login = () => {
           description: "Phone verified successfully!",
         });
 
-        // Navigate to home page
-        navigate("/home");
+        // Fetch user data to check if email exists
+        try {
+          const userData = await shopfloAuthApi.getUserData(response.data.access_token);
+
+          console.log('User data from /me API:', userData);
+
+          // Store user ID for later use in email verification
+          setUserId(userData.id);
+          console.log('Stored userId:', userData.id);
+
+          // Check if user has email using the external email key
+          const hasEmail = userData.email && userData.email !== '' && userData.email !== null;
+
+          if (!hasEmail) {
+            // User doesn't have email, show email verification screen
+            console.log('No email found, showing email verification screen');
+            setStep("email");
+          } else {
+            // User has email, navigate to home
+            console.log('Email found, navigating to home');
+            navigate("/home");
+          }
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
+          // If fetching user data fails, still navigate to home
+          navigate("/home");
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to verify OTP. Please try again.";
@@ -157,7 +183,7 @@ const Login = () => {
     }
   };
 
-  const handleSendEmailOtp = () => {
+  const handleSendEmailOtp = async () => {
     if (!email || !email.includes("@")) {
       toast({
         title: "Invalid email",
@@ -167,33 +193,87 @@ const Login = () => {
       return;
     }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setShowEmailOtpInput(true);
-      setIsLoading(false);
+    if (!userId) {
       toast({
-        title: "Code Sent",
-        description: "Check your email for the verification code",
-      });
-    }, 1000);
-  };
-
-  const handleVerifyEmailOtp = () => {
-    if (emailOtp.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter a valid 6-digit OTP",
+        title: "Error",
+        description: "User ID not found. Please try logging in again.",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      // Send OTP with linked_user_id from /me API
+      console.log('Sending email OTP with userId:', userId);
+      const response = await shopfloAuthApi.sendOtp(email, userId);
+
+      if (response.success) {
+        setContextId(response.data.context_id);
+        setShowEmailOtpInput(true);
+
+        toast({
+          title: "Code Sent",
+          description: "Check your email for the verification code",
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send verification code. Please try again.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/home");
-    }, 1000);
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    if (emailOtp.length !== 4) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a valid 4-digit OTP",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!contextId) {
+      toast({
+        title: "Error",
+        description: "Session expired. Please request a new code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await shopfloAuthApi.verifyOtp(contextId, emailOtp);
+
+      if (response.success && response.data.otp_verified) {
+        // Email verified successfully - tokens remain from phone verification
+        toast({
+          title: "Success",
+          description: "Email verified successfully!",
+        });
+
+        // Navigate to home page
+        navigate("/home");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to verify OTP. Please try again.";
+      toast({
+        title: "Verification Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -542,26 +622,38 @@ const Login = () => {
                   </label>
                   <Input
                     type="text"
-                    placeholder="Enter 6-digit code"
+                    placeholder="Enter 4-digit OTP"
                     value={emailOtp}
                     onChange={(e) =>
-                      setEmailOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      setEmailOtp(e.target.value.replace(/\D/g, "").slice(0, 4))
                     }
                     className="h-12 bg-muted/50 border-0 rounded-xl text-xl text-center tracking-[0.3em] placeholder:text-muted-foreground/60 placeholder:tracking-normal placeholder:text-sm"
                     autoFocus
                   />
                   <button
-                    onClick={() => {
-                      setShowEmailOtpInput(false);
-                      setTimeout(() => {
-                        setShowEmailOtpInput(true);
+                    onClick={async () => {
+                      setIsLoading(true);
+                      try {
+                        const response = await shopfloAuthApi.sendOtp(email, userId);
+                        if (response.success) {
+                          setContextId(response.data.context_id);
+                          toast({
+                            title: "Code Resent",
+                            description: "A new code has been sent to your email",
+                          });
+                        }
+                      } catch (error) {
                         toast({
-                          title: "Code Resent",
-                          description: "A new code has been sent to your email",
+                          title: "Error",
+                          description: "Failed to resend code. Please try again.",
+                          variant: "destructive",
                         });
-                      }, 500);
+                      } finally {
+                        setIsLoading(false);
+                      }
                     }}
                     className="text-xs text-muted-foreground hover:text-foreground hover:underline mt-3 block"
+                    disabled={isLoading}
                   >
                     Didn't receive code? Resend
                   </button>
@@ -597,7 +689,7 @@ const Login = () => {
             ) : (
               <Button
                 onClick={handleVerifyEmailOtp}
-                disabled={isLoading || emailOtp.length !== 6}
+                disabled={isLoading || emailOtp.length !== 4}
                 className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
               >
                 {isLoading ? "Verifying..." : "Verify & Continue"}

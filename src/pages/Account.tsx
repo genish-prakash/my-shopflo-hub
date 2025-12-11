@@ -1,13 +1,16 @@
 import { User, SlidersHorizontal, MapPin, Shield, Bell, LogOut, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useUser } from "@/contexts/UserContext";
+import { getUserDisplayName } from "@/lib/userUtils";
+import UserAvatar from "@/components/common/UserAvatar";
 import { logout } from "@/lib/auth";
 import wanderLogo from "@/assets/wander-logo.png";
 
 const Account = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useUser();
 
   const handleLogout = () => {
     toast({
@@ -71,14 +74,14 @@ const Account = () => {
       {/* Profile Section */}
       <div className="bg-card px-4 py-6">
         <div className="flex items-center gap-4">
-          <Avatar className="w-16 h-16">
-            <AvatarFallback className="bg-neutral-200 text-neutral-600 text-xl font-semibold">
-              RK
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar size="lg" />
           <div>
-            <h1 className="text-lg font-bold text-foreground">Rahul Kumar</h1>
-            <p className="text-sm text-muted-foreground">rahul.kumar@email.com</p>
+            <h1 className="text-lg font-bold text-foreground">
+              {getUserDisplayName(user)}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {user?.email || user?.phone_number || ''}
+            </p>
           </div>
         </div>
       </div>
