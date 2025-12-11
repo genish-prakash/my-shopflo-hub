@@ -11,6 +11,9 @@ import proteinImg from "@/assets/protein_wander.png";
 import necklaceImg from "@/assets/necklace_wander.png";
 import lipstickImg from "@/assets/lipstick_wander.png";
 import joggerImg from "@/assets/jogger_wander.png";
+import cremeImg from "@/assets/creme_wander.png";
+import boxImg from "@/assets/box_wander.png";
+import dressImg from "@/assets/dress_wander.png";
 import { ArrowLeft, ArrowRight, Package, Percent } from "lucide-react";
 
 const ROTATING_TEXTS = [
@@ -21,13 +24,16 @@ const ROTATING_TEXTS = [
 ];
 
 const FLOATING_PRODUCTS = [
-  { img: tshirtImg, top: 8, left: 5, delay: 0 },
-  { img: shoesImg, top: 28, right: 8, delay: 0.5 },
-  { img: sareeImg, top: 48, left: 3, delay: 1 },
-  { img: proteinImg, top: 68, right: 5, delay: 1.5 },
-  { img: necklaceImg, top: 15, right: 2, delay: 0.3 },
-  { img: lipstickImg, top: 55, right: 10, delay: 0.8 },
-  { img: joggerImg, top: 78, left: 8, delay: 1.2 },
+  { img: tshirtImg, top: 5, left: 3, delay: 0 },
+  { img: shoesImg, top: 18, right: 5, delay: 0.5 },
+  { img: sareeImg, top: 32, left: 2, delay: 1 },
+  { img: proteinImg, top: 45, right: 3, delay: 1.5 },
+  { img: necklaceImg, top: 10, right: 1, delay: 0.3 },
+  { img: lipstickImg, top: 38, right: 8, delay: 0.8 },
+  { img: joggerImg, top: 55, left: 5, delay: 1.2 },
+  { img: cremeImg, top: 25, left: 6, delay: 0.6 },
+  { img: boxImg, top: 50, right: 6, delay: 1.8 },
+  { img: dressImg, top: 62, left: 1, delay: 0.9 },
 ];
 
 const Login = () => {

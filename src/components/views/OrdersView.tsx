@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { ChevronRight, X, MapPin, Package } from "lucide-react";
+import { ChevronRight, X, MapPin, Package, Star, Check, Circle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -8,6 +9,12 @@ import {
 } from "@/components/ui/sheet";
 
 type FilterType = "placed" | "delivered";
+
+interface TimelineStep {
+  status: string;
+  date: string | null;
+  completed: boolean;
+}
 
 const mockOrders = [
   {
@@ -23,6 +30,14 @@ const mockOrders = [
     items: [
       { name: "Air Max 270 React - Black/White", quantity: 1, price: 12999, image: "👟" },
     ],
+    timeline: [
+      { status: "Order Placed", date: "15 Jan, 10:30 AM", completed: true },
+      { status: "Confirmed", date: "15 Jan, 11:00 AM", completed: true },
+      { status: "Shipped", date: "16 Jan, 2:00 PM", completed: true },
+      { status: "In Transit", date: "17 Jan, 9:00 AM", completed: true },
+      { status: "Out for Delivery", date: null, completed: false },
+      { status: "Delivered", date: null, completed: false },
+    ],
   },
   {
     id: "ORD-78235",
@@ -36,6 +51,14 @@ const mockOrders = [
     address: "456 Park Street, Mumbai, Maharashtra 400001",
     items: [
       { name: "AirPods Pro (2nd Generation)", quantity: 1, price: 24900, image: "🎧" },
+    ],
+    timeline: [
+      { status: "Order Placed", date: "10 Jan, 9:00 AM", completed: true },
+      { status: "Confirmed", date: "10 Jan, 9:30 AM", completed: true },
+      { status: "Shipped", date: "11 Jan, 10:00 AM", completed: true },
+      { status: "In Transit", date: "12 Jan, 8:00 AM", completed: true },
+      { status: "Out for Delivery", date: "13 Jan, 7:00 AM", completed: true },
+      { status: "Delivered", date: "13 Jan, 2:30 PM", completed: true },
     ],
   },
   {
@@ -51,6 +74,14 @@ const mockOrders = [
     items: [
       { name: "Premium Cotton Shirt - Blue", quantity: 1, price: 2499, image: "👔" },
     ],
+    timeline: [
+      { status: "Order Placed", date: "18 Jan, 3:00 PM", completed: true },
+      { status: "Confirmed", date: "18 Jan, 3:15 PM", completed: true },
+      { status: "Shipped", date: null, completed: false },
+      { status: "In Transit", date: null, completed: false },
+      { status: "Out for Delivery", date: null, completed: false },
+      { status: "Delivered", date: null, completed: false },
+    ],
   },
   {
     id: "ORD-78237",
@@ -64,6 +95,14 @@ const mockOrders = [
     address: "321 Cyber City, Gurgaon, Haryana 122002",
     items: [
       { name: "Galaxy Buds Pro - Black", quantity: 1, price: 9999, image: "🎧" },
+    ],
+    timeline: [
+      { status: "Order Placed", date: "5 Jan, 11:00 AM", completed: true },
+      { status: "Confirmed", date: "5 Jan, 11:30 AM", completed: true },
+      { status: "Shipped", date: "6 Jan, 9:00 AM", completed: true },
+      { status: "In Transit", date: "7 Jan, 10:00 AM", completed: true },
+      { status: "Out for Delivery", date: "8 Jan, 8:00 AM", completed: true },
+      { status: "Delivered", date: "8 Jan, 1:00 PM", completed: true },
     ],
   },
 ];
@@ -215,23 +254,80 @@ const OrdersView = () => {
                   </Badge>
                 </div>
 
+                {/* Delivery Timeline */}
+                <div className="bg-muted/30 rounded-2xl p-4">
+                  <h3 className="font-semibold text-foreground mb-4">Delivery Progress</h3>
+                  <div className="relative">
+                    {selectedOrder.timeline.map((step, index) => (
+                      <div key={index} className="flex items-start gap-3 relative">
+                        {/* Vertical dotted line */}
+                        {index < selectedOrder.timeline.length - 1 && (
+                          <div 
+                            className={`absolute left-[11px] top-6 w-0.5 h-[calc(100%-8px)] ${
+                              step.completed && selectedOrder.timeline[index + 1]?.completed 
+                                ? 'bg-green-500' 
+                                : 'border-l-2 border-dashed border-muted-foreground/30'
+                            }`}
+                          />
+                        )}
+                        
+                        {/* Status circle */}
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 z-10 ${
+                          step.completed 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-muted border-2 border-muted-foreground/30'
+                        }`}>
+                          {step.completed ? (
+                            <Check className="w-3.5 h-3.5" />
+                          ) : (
+                            <Circle className="w-2 h-2 text-muted-foreground/50" />
+                          )}
+                        </div>
+                        
+                        {/* Status text and date */}
+                        <div className={`flex-1 pb-6 ${index === selectedOrder.timeline.length - 1 ? 'pb-0' : ''}`}>
+                          <p className={`text-sm font-medium ${step.completed ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            {step.status}
+                          </p>
+                          {step.date && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{step.date}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Order Items */}
                 <div className="bg-muted/30 rounded-2xl p-4">
                   <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                     <Package className="w-4 h-4" />
-                    Items
+                    Products Purchased
                   </h3>
                   <div className="space-y-3">
                     {selectedOrder.items.map((item, index) => (
-                      <div key={index} className="flex items-center gap-3 bg-card rounded-xl p-3">
-                        <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center text-3xl">
-                          {item.image}
+                      <div key={index} className="bg-card rounded-xl p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center text-3xl">
+                            {item.image}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                            <p className="text-sm font-semibold text-foreground mt-1">₹{item.price.toLocaleString()}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-                        </div>
-                        <p className="text-sm font-semibold text-foreground">₹{item.price.toLocaleString()}</p>
+                        {/* Review CTA */}
+                        {selectedOrder.status === "Delivered" && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full mt-3 rounded-xl border-amber-300 text-amber-700 hover:bg-amber-50"
+                          >
+                            <Star className="w-4 h-4 mr-2" />
+                            Rate & Review
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
