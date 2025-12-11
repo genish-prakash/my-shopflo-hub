@@ -22,8 +22,6 @@ const BrandsView = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-  console.log(brands)
-
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -214,12 +212,7 @@ const BrandsView = () => {
       price: product.price,
       originalPrice: product.original_price,
       images: [product.image],
-      brand: {
-        name: brand.name,
-        logo: brand.logo,
-        color: brand.color,
-        website: "", // Not available in API
-      },
+      brand: brand, // Pass the full brand object to ensure we have merchant_id and other details
       description: `Premium ${product.name} from ${brand.name}.`,
       variants: [], // Not available in API
       isWishlisted: false, // Not available in API
@@ -442,12 +435,12 @@ const BrandsView = () => {
                     <Button
                       className="w-full rounded-full h-10 font-medium text-sm backdrop-blur-md border border-white/30"
                       style={{
-                        backgroundColor: `${brand.color}90`,
+                        backgroundColor: `${brand.color}`,
                         color: "white",
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigateToBrand(brand.id);
+                        navigateToBrand(brand.merchant_id);
                       }}
                     >
                       Shop All
@@ -472,6 +465,7 @@ const BrandsView = () => {
         isOpen={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
         product={selectedProduct}
+        brand={selectedProduct?.brand}
         onToggleWishlist={(id) => {
           // TODO: Implement wishlist toggle
           console.log("Toggle wishlist from sheet", id);
