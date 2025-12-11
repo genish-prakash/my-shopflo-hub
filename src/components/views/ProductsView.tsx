@@ -1,8 +1,17 @@
 import { useState, useMemo } from "react";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, Star, X } from "lucide-react";
 import ProductDetailSheet from "@/components/ProductDetailSheet";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type TabType = "wishlisted" | "purchased";
+
+interface ProductReview {
+  rating: number;
+  review: string;
+}
 
 const mockProducts = {
   wishlisted: [
@@ -23,6 +32,11 @@ const ProductsView = () => {
   const [activeTab, setActiveTab] = useState<TabType>("wishlisted");
   const [wishlistedProducts, setWishlistedProducts] = useState(mockProducts.wishlisted);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [productToReview, setProductToReview] = useState<any>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [productReviews, setProductReviews] = useState<Record<string, ProductReview>>({});
 
   const removeFromWishlist = (productId: string) => {
     setWishlistedProducts(prev => prev.filter(p => p.id !== productId));
@@ -72,6 +86,35 @@ const ProductsView = () => {
       ],
       isWishlisted: activeTab === "wishlisted",
     });
+  };
+
+  const openReviewDialog = (product: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setProductToReview(product);
+    setReviewRating(productReviews[product.id]?.rating || 0);
+    setReviewText(productReviews[product.id]?.review || "");
+    setReviewDialogOpen(true);
+  };
+
+  const handleSubmitReview = () => {
+    if (reviewRating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+    
+    setProductReviews(prev => ({
+      ...prev,
+      [productToReview.id]: {
+        rating: reviewRating,
+        review: reviewText,
+      }
+    }));
+    
+    toast.success("Review submitted successfully!");
+    setReviewDialogOpen(false);
+    setProductToReview(null);
+    setReviewRating(0);
+    setReviewText("");
   };
 
   return (
@@ -134,6 +177,34 @@ const ProductsView = () => {
                 <p className="text-sm font-bold text-foreground">
                   ₹{product.price.toLocaleString()}
                 </p>
+                
+                {/* Review CTA for purchased products */}
+                {activeTab === "purchased" && (
+                  <div className="mt-2">
+                    {productReviews[product.id] ? (
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-3 h-3 ${
+                              star <= productReviews[product.id].rating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-neutral-300"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-xs text-muted-foreground ml-1">Reviewed</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => openReviewDialog(product, e)}
+                        className="text-xs font-medium text-neutral-600 hover:text-foreground underline underline-offset-2"
+                      >
+                        Rate & Review
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Wishlist Button */}
@@ -165,6 +236,75 @@ const ProductsView = () => {
           setSelectedProduct(null);
         }}
       />
+
+      {/* Review Dialog */}
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent className="max-w-sm mx-4">
+          <DialogHeader>
+            <DialogTitle className="text-lg">Rate & Review</DialogTitle>
+          </DialogHeader>
+          
+          {productToReview && (
+            <div className="space-y-4">
+              {/* Product Info */}
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center text-2xl">
+                  {productToReview.image}
+                </div>
+                <div>
+                  <p className="font-medium text-sm text-foreground">{productToReview.name}</p>
+                  <p className="text-xs text-muted-foreground">{productToReview.brand}</p>
+                </div>
+              </div>
+
+              {/* Star Rating */}
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">
+                  Your Rating
+                </label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setReviewRating(star)}
+                      className="p-1 transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`w-8 h-8 ${
+                          star <= reviewRating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-neutral-300 hover:text-yellow-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Text */}
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">
+                  Your Review (Optional)
+                </label>
+                <Textarea
+                  placeholder="Share your experience with this product..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                onClick={handleSubmitReview}
+                className="w-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                Submit Review
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -23,25 +23,28 @@ const ROTATING_TEXTS = [
   "Follow all your favourite brands at one place",
 ];
 
+// Spread images across screen - avoiding center CTA area (30-70% horizontal, 70-90% vertical)
 const FLOATING_PRODUCTS = [
-  { img: tshirtImg, top: 5, left: 3, delay: 0 },
-  { img: shoesImg, top: 18, right: 5, delay: 0.5 },
-  { img: sareeImg, top: 32, left: 2, delay: 1 },
-  { img: proteinImg, top: 45, right: 3, delay: 1.5 },
-  { img: necklaceImg, top: 10, right: 1, delay: 0.3 },
-  { img: lipstickImg, top: 38, right: 8, delay: 0.8 },
-  { img: joggerImg, top: 55, left: 5, delay: 1.2 },
-  { img: cremeImg, top: 25, left: 6, delay: 0.6 },
-  { img: boxImg, top: 50, right: 6, delay: 1.8 },
-  { img: dressImg, top: 62, left: 1, delay: 0.9 },
+  { img: tshirtImg, top: 3, left: 5, delay: 0 },
+  { img: shoesImg, top: 8, right: 8, delay: 0.5 },
+  { img: sareeImg, top: 18, left: 2, delay: 1 },
+  { img: proteinImg, top: 25, right: 3, delay: 1.5 },
+  { img: necklaceImg, top: 35, left: 8, delay: 0.3 },
+  { img: lipstickImg, top: 42, right: 5, delay: 0.8 },
+  { img: joggerImg, top: 52, left: 3, delay: 1.2 },
+  { img: cremeImg, top: 58, right: 2, delay: 0.6 },
+  { img: boxImg, top: 12, left: 85, delay: 1.8 },
+  { img: dressImg, top: 48, right: 88, delay: 0.9 },
 ];
 
 const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"welcome" | "phone">("welcome");
+  const [step, setStep] = useState<"welcome" | "phone" | "email">("welcome");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isTextVisible, setIsTextVisible] = useState(true);
   const navigate = useNavigate();
@@ -60,7 +63,15 @@ const Login = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSendOtp = () => {
+  // Simulated backend check for new/existing user
+  const checkUserStatus = async (phone: string): Promise<boolean> => {
+    // Simulate API call - returns true if new user
+    await new Promise(resolve => setTimeout(resolve, 500));
+    // For demo: phone numbers starting with 9 are new users
+    return phone.startsWith("9");
+  };
+
+  const handleSendOtp = async () => {
     if (phoneNumber.length !== 10) {
       toast({
         title: "Invalid phone number",
@@ -71,12 +82,45 @@ const Login = () => {
     }
 
     setIsLoading(true);
+    
+    // Check if user is new or existing
+    const newUser = await checkUserStatus(phoneNumber);
+    setIsNewUser(newUser);
+    
+    if (newUser) {
+      // New user - need email verification
+      setIsLoading(false);
+      setStep("email");
+    } else {
+      // Existing user - send OTP to phone
+      setTimeout(() => {
+        setShowOtpInput(true);
+        setIsLoading(false);
+        toast({
+          title: "OTP Sent",
+          description: "Check your phone for the verification code",
+        });
+      }, 500);
+    }
+  };
+
+  const handleSendEmailOtp = () => {
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
     setTimeout(() => {
       setShowOtpInput(true);
       setIsLoading(false);
       toast({
-        title: "OTP Sent",
-        description: "Check your phone for the verification code",
+        title: "Code Sent",
+        description: "Check your email for the verification code",
       });
     }, 1000);
   };
@@ -103,6 +147,9 @@ const Login = () => {
     if (showOtpInput) {
       setShowOtpInput(false);
       setOtp("");
+    } else if (step === "email") {
+      setStep("phone");
+      setEmail("");
     } else if (step === "phone") {
       setStep("welcome");
       setPhoneNumber("");
@@ -147,7 +194,7 @@ const Login = () => {
       {/* Welcome Screen */}
       {step === "welcome" && (
         <div className="flex-1 flex flex-col items-center justify-center px-6 animate-fade-in relative">
-          {/* Floating Product Images */}
+          {/* Floating Product Images - Spread across screen */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {FLOATING_PRODUCTS.map((product, index) => (
               <div
@@ -163,7 +210,7 @@ const Login = () => {
                 <img 
                   src={product.img} 
                   alt="" 
-                  className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg"
+                  className="w-14 h-14 md:w-16 md:h-16 object-contain drop-shadow-lg"
                 />
               </div>
             ))}
@@ -208,7 +255,7 @@ const Login = () => {
                 key={index}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentTextIndex
-                    ? "bg-primary w-6"
+                    ? "bg-foreground w-6"
                     : "bg-muted-foreground/20 w-2"
                 }`}
               />
@@ -314,7 +361,7 @@ const Login = () => {
                         });
                       }, 500);
                     }}
-                    className="text-xs text-primary hover:underline mt-3 block"
+                    className="text-xs text-muted-foreground hover:text-foreground hover:underline mt-3 block"
                   >
                     Didn't receive code? Resend
                   </button>
@@ -354,7 +401,127 @@ const Login = () => {
                 disabled={isLoading || phoneNumber.length !== 10}
                 className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
               >
-                {isLoading ? "Sending OTP..." : "Continue"}
+                {isLoading ? "Checking..." : "Continue"}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleVerifyOtp}
+                disabled={isLoading || otp.length !== 6}
+                className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
+              >
+                {isLoading ? "Verifying..." : "Verify & Continue"}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Email Verification Screen (New Users) */}
+      {step === "email" && (
+        <div className="flex-1 flex flex-col px-6 pt-20 animate-fade-in relative z-10">
+          <div className="flex-1 flex flex-col">
+            {/* Header Content */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <img
+                  src={wanderLogo}
+                  alt="Wander"
+                  className="h-10 w-10 object-contain rounded-xl"
+                />
+                <div>
+                  <h2 className="font-semibold text-foreground font-roboto">Wander</h2>
+                  <p className="text-xs text-muted-foreground">from Shopflo</p>
+                </div>
+              </div>
+              
+              <h1 className="text-xl font-bold text-foreground mb-1">
+                {showOtpInput ? "Verify your email" : "Welcome to Wander"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {showOtpInput 
+                  ? `Enter the code sent to ${email}` 
+                  : "You're new here! Please enter your email to continue"
+                }
+              </p>
+            </div>
+
+            {/* Input Section */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-5 shadow-sm space-y-4">
+              {/* Email Input */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-12 bg-muted/50 border-0 rounded-xl text-base placeholder:text-muted-foreground/60"
+                  autoFocus
+                  disabled={showOtpInput}
+                />
+              </div>
+
+              {/* OTP Input - Shows after email is submitted */}
+              {showOtpInput && (
+                <div className="animate-fade-in pt-2">
+                  <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                    Verification Code
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter 6-digit code"
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    className="h-12 bg-muted/50 border-0 rounded-xl text-xl text-center tracking-[0.3em] placeholder:text-muted-foreground/60 placeholder:tracking-normal placeholder:text-sm"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      setShowOtpInput(false);
+                      setTimeout(() => {
+                        setShowOtpInput(true);
+                        toast({
+                          title: "Code Resent",
+                          description: "A new code has been sent to your email",
+                        });
+                      }, 500);
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground hover:underline mt-3 block"
+                  >
+                    Didn't receive code? Resend
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Info for new users */}
+            {!showOtpInput && (
+              <div className="mt-6 animate-fade-in">
+                <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-2xl p-3">
+                  <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
+                    <Package className="w-5 h-5 text-neutral-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">New to Wander?</p>
+                    <p className="text-xs text-muted-foreground">We'll create your account with this email</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="pb-8 pt-4">
+            {!showOtpInput ? (
+              <Button
+                onClick={handleSendEmailOtp}
+                disabled={isLoading || !email || !email.includes("@")}
+                className="w-full h-14 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full disabled:opacity-40 shadow-lg"
+              >
+                {isLoading ? "Sending code..." : "Continue"}
               </Button>
             ) : (
               <Button
