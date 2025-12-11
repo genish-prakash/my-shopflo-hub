@@ -1,6 +1,13 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ChevronDown, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  Heart,
+  ChevronDown,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,10 +15,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockBrands, Brand, Product } from "@/data/brands";
+import { discoverApi } from "@/services/mystique/discoverApi";
+import { DiscoverBrand, DiscoverProduct } from "@/services/mystique/types";
 import ProductDetailSheet from "@/components/ProductDetailSheet";
 
-type SortOption = "best-selling" | "newest" | "price-low-high" | "price-high-low";
+// Extend DiscoverProduct to include local state like is_wishlisted
+interface BrandDetailProduct extends DiscoverProduct {
+  is_wishlisted?: boolean;
+}
+
+interface BrandDetailState extends Omit<DiscoverBrand, "products"> {
+  products: BrandDetailProduct[];
+}
+
+type SortOption =
+  | "best-selling"
+  | "newest"
+  | "price-low-high"
+  | "price-high-low";
 
 const SORT_OPTIONS = [
   { value: "best-selling", label: "Best Selling" },
@@ -24,48 +45,76 @@ const BrandDetail = () => {
   const { brandId } = useParams();
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement>(null);
-  
-  const [brand, setBrand] = useState<Brand | null>(() => {
-    return mockBrands.find(b => b.id === brandId) || null;
-  });
-  
+
+  const [brand, setBrand] = useState<BrandDetailState | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [sortBy, setSortBy] = useState<SortOption>("best-selling");
   const [showOnSale, setShowOnSale] = useState(false);
   const [showInStock, setShowInStock] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
+  useEffect(() => {
+    const fetchBrand = async () => {
+      if (!brandId) return;
+
+      try {
+        setIsLoading(true);
+        const data = await discoverApi.getBrandDetails(brandId);
+        // Initialize is_wishlisted for products
+        const productsWithWishlist = data.products.map((p) => ({
+          ...p,
+          is_wishlisted: false,
+        }));
+
+        setBrand({
+          ...data,
+          products: productsWithWishlist,
+        });
+      } catch (err) {
+        console.error("Failed to fetch brand details:", err);
+        setError("Failed to load brand details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBrand();
+  }, [brandId]);
+
   const toggleWishlist = (productId: string) => {
     if (!brand) return;
     setBrand({
       ...brand,
-      products: brand.products.map(product =>
-        product.id === productId 
-          ? { ...product, isWishlisted: !product.isWishlisted }
+      products: brand.products.map((product) =>
+        product.id === productId
+          ? { ...product, is_wishlisted: !product.is_wishlisted }
           : product
-      )
+      ),
     });
   };
 
   const filteredAndSortedProducts = useMemo(() => {
     if (!brand) return [];
-    
+
     let products = [...brand.products];
-    
+
     // Apply filters
     if (showOnSale) {
-      products = products.filter(p => p.isOnSale);
+      products = products.filter((p) => p.is_on_sale);
     }
     if (showInStock) {
-      products = products.filter(p => p.inStock);
+      products = products.filter((p) => p.in_stock);
     }
-    
+
     // Apply sorting
     switch (sortBy) {
       case "best-selling":
-        products.sort((a, b) => b.salesCount - a.salesCount);
+        products.sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0));
         break;
       case "newest":
-        products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        products.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
         break;
       case "price-low-high":
         products.sort((a, b) => a.price - b.price);
@@ -74,69 +123,77 @@ const BrandDetail = () => {
         products.sort((a, b) => b.price - a.price);
         break;
     }
-    
+
     return products;
   }, [brand, sortBy, showOnSale, showInStock]);
 
   const recommendedProducts = useMemo(() => {
     if (!brand) return [];
     return [...brand.products]
-      .sort((a, b) => b.salesCount - a.salesCount)
+      .sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0))
       .slice(0, 8);
   }, [brand]);
 
-  const scrollCarousel = (direction: 'left' | 'right') => {
+  const scrollCarousel = (direction: "left" | "right") => {
     if (carouselRef.current) {
       const scrollAmount = carouselRef.current.offsetWidth * 0.8;
       carouselRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
       });
     }
   };
 
-  const openProductDetail = (product: Product) => {
+  const openProductDetail = (product: BrandDetailProduct) => {
     if (!brand) return;
     setSelectedProduct({
       id: product.id,
       name: product.name,
       price: product.price,
-      originalPrice: product.originalPrice,
+      originalPrice: product.original_price,
       images: [product.image, product.image, product.image],
       brand: {
         name: brand.name,
         logo: brand.logo,
         color: brand.color,
-        website: `https://${brand.name.toLowerCase().replace(/\s+/g, '')}.com`,
+        website: `https://${brand.name.toLowerCase().replace(/\s+/g, "")}.com`,
       },
       description: `Premium ${product.name} from ${brand.name}. High quality product with excellent craftsmanship.`,
       variants: [
         { id: "s", name: "S", available: true },
         { id: "m", name: "M", available: true },
-        { id: "l", name: "L", available: product.inStock },
+        { id: "l", name: "L", available: product.in_stock },
         { id: "xl", name: "XL", available: true },
       ],
-      isWishlisted: product.isWishlisted,
+      isWishlisted: product.is_wishlisted,
     });
   };
 
-  if (!brand) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Brand not found</p>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error || !brand) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">{error || "Brand not found"}</p>
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen relative"
       style={{
         background: `linear-gradient(180deg, ${brand.color}15 0%, ${brand.color}05 30%, hsl(var(--background)) 60%)`,
       }}
     >
       {/* Blurred background overlay */}
-      <div 
+      <div
         className="absolute inset-0 backdrop-blur-3xl pointer-events-none"
         style={{
           background: `radial-gradient(ellipse at top, ${brand.color}20 0%, transparent 50%)`,
@@ -147,7 +204,7 @@ const BrandDetail = () => {
       <div className="relative z-10">
         {/* Header */}
         <div className="sticky top-0 z-10 px-4 py-4 flex items-center gap-4 bg-background/80 backdrop-blur-md">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="p-2 rounded-full bg-background/80 backdrop-blur-sm shadow-sm"
           >
@@ -155,12 +212,12 @@ const BrandDetail = () => {
           </button>
           <div className="flex items-center gap-3 flex-1">
             <div className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center overflow-hidden">
-              <img 
-                src={brand.logo} 
+              <img
+                src={brand.logo}
                 alt={brand.name}
                 className="w-7 h-7 object-contain"
                 onError={(e) => {
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.style.display = "none";
                 }}
               />
             </div>
@@ -173,34 +230,36 @@ const BrandDetail = () => {
           <section className="py-6">
             <div className="bg-background/60 backdrop-blur-sm rounded-2xl p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Recommended for you</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  Recommended for you
+                </h2>
                 <div className="flex gap-2">
-                  <button 
-                    onClick={() => scrollCarousel('left')}
+                  <button
+                    onClick={() => scrollCarousel("left")}
                     className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button 
-                    onClick={() => scrollCarousel('right')}
+                  <button
+                    onClick={() => scrollCarousel("right")}
                     className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <div 
+              <div
                 ref={carouselRef}
                 className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {recommendedProducts.map((product) => (
-                  <div 
+                  <div
                     key={product.id}
                     className="flex-shrink-0 w-[75%] snap-start"
                     onClick={() => openProductDetail(product)}
                   >
-                    <RecommendedProductCard 
+                    <RecommendedProductCard
                       product={product}
                       brandColor={brand.color}
                       onToggleWishlist={() => toggleWishlist(product.id)}
@@ -217,8 +276,12 @@ const BrandDetail = () => {
               {/* Sort Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-full bg-background">
-                    {SORT_OPTIONS.find(o => o.value === sortBy)?.label}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full bg-background"
+                  >
+                    {SORT_OPTIONS.find((o) => o.value === sortBy)?.label}
                     <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -230,7 +293,9 @@ const BrandDetail = () => {
                       className="flex items-center justify-between"
                     >
                       {option.label}
-                      {sortBy === option.value && <Check className="w-4 h-4 ml-2" />}
+                      {sortBy === option.value && (
+                        <Check className="w-4 h-4 ml-2" />
+                      )}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -274,8 +339,11 @@ const BrandDetail = () => {
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {filteredAndSortedProducts.map((product) => (
-                  <div key={product.id} onClick={() => openProductDetail(product)}>
-                    <ProductCard 
+                  <div
+                    key={product.id}
+                    onClick={() => openProductDetail(product)}
+                  >
+                    <ProductCard
                       product={product}
                       brandColor={brand.color}
                       onToggleWishlist={() => toggleWishlist(product.id)}
@@ -303,12 +371,16 @@ const BrandDetail = () => {
 };
 
 interface ProductCardProps {
-  product: Product;
+  product: BrandDetailProduct;
   brandColor: string;
   onToggleWishlist: () => void;
 }
 
-const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps) => (
+const ProductCard = ({
+  product,
+  brandColor,
+  onToggleWishlist,
+}: ProductCardProps) => (
   <div
     className="relative bg-card rounded-2xl p-3 shadow-sm cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
     style={{
@@ -320,15 +392,15 @@ const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps
       <span className="text-sm font-semibold text-foreground">
         ₹{product.price.toLocaleString()}
       </span>
-      {product.originalPrice && (
+      {product.original_price && (
         <span className="text-xs text-muted-foreground line-through truncate">
-          ₹{product.originalPrice.toLocaleString()}
+          ₹{product.original_price.toLocaleString()}
         </span>
       )}
     </div>
 
     {/* Sale Badge */}
-    {product.isOnSale && (
+    {product.is_on_sale && (
       <span className="absolute top-3 right-3 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
         SALE
       </span>
@@ -336,13 +408,22 @@ const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps
 
     {/* Product Icon */}
     <div className="flex items-center justify-center text-5xl py-8">
-      {product.image}
+      <img
+        src={product.image}
+        alt={product.name}
+        className="w-full h-full object-contain max-h-[80px]"
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
     </div>
 
     {/* Product Name & Stock */}
     <div className="space-y-1 pr-8">
-      <p className="text-sm text-foreground font-medium truncate">{product.name}</p>
-      {!product.inStock && (
+      <p className="text-sm text-foreground font-medium truncate">
+        {product.name}
+      </p>
+      {!product.in_stock && (
         <p className="text-xs text-red-500">Out of Stock</p>
       )}
     </div>
@@ -357,7 +438,7 @@ const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps
     >
       <Heart
         className={`w-5 h-5 transition-all ${
-          product.isWishlisted
+          product.is_wishlisted
             ? "fill-red-500 text-red-500"
             : "text-muted-foreground hover:text-red-400"
         }`}
@@ -366,7 +447,11 @@ const ProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps
   </div>
 );
 
-const RecommendedProductCard = ({ product, brandColor, onToggleWishlist }: ProductCardProps) => (
+const RecommendedProductCard = ({
+  product,
+  brandColor,
+  onToggleWishlist,
+}: ProductCardProps) => (
   <div
     className="relative bg-card rounded-2xl p-4 shadow-sm cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
     style={{
@@ -378,15 +463,15 @@ const RecommendedProductCard = ({ product, brandColor, onToggleWishlist }: Produ
       <span className="text-lg font-bold text-foreground">
         ₹{product.price.toLocaleString()}
       </span>
-      {product.originalPrice && (
+      {product.original_price && (
         <span className="text-sm text-muted-foreground line-through">
-          ₹{product.originalPrice.toLocaleString()}
+          ₹{product.original_price.toLocaleString()}
         </span>
       )}
     </div>
 
     {/* Sale Badge */}
-    {product.isOnSale && (
+    {product.is_on_sale && (
       <span className="absolute top-4 right-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
         SALE
       </span>
@@ -394,13 +479,22 @@ const RecommendedProductCard = ({ product, brandColor, onToggleWishlist }: Produ
 
     {/* Product Icon */}
     <div className="flex items-center justify-center text-7xl py-10">
-      {product.image}
+      <img
+        src={product.image}
+        alt={product.name}
+        className="w-full h-full object-contain max-h-[120px]"
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
     </div>
 
     {/* Product Name & Stock */}
     <div className="space-y-1 pr-10">
-      <p className="text-base text-foreground font-medium truncate">{product.name}</p>
-      {!product.inStock && (
+      <p className="text-base text-foreground font-medium truncate">
+        {product.name}
+      </p>
+      {!product.in_stock && (
         <p className="text-sm text-red-500">Out of Stock</p>
       )}
     </div>
@@ -415,7 +509,7 @@ const RecommendedProductCard = ({ product, brandColor, onToggleWishlist }: Produ
     >
       <Heart
         className={`w-6 h-6 transition-all ${
-          product.isWishlisted
+          product.is_wishlisted
             ? "fill-red-500 text-red-500"
             : "text-muted-foreground hover:text-red-400"
         }`}
