@@ -239,70 +239,72 @@ const ProductsView = () => {
 
       {/* Review Dialog */}
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="max-w-sm mx-4">
-          <DialogHeader>
-            <DialogTitle className="text-lg">Rate & Review</DialogTitle>
-          </DialogHeader>
-          
-          {productToReview && (
-            <div className="space-y-4">
-              {/* Product Info */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center text-2xl">
-                  {productToReview.image}
+        <DialogContent className="w-[calc(100%-2rem)] max-w-sm mx-auto rounded-3xl p-0 border-0 shadow-xl bg-card">
+          <div className="p-6">
+            <DialogHeader className="text-center mb-4">
+              <DialogTitle className="text-xl font-semibold text-foreground">Rate & Review</DialogTitle>
+            </DialogHeader>
+            
+            {productToReview && (
+              <div className="space-y-5">
+                {/* Product Info */}
+                <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-2xl">
+                  <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center text-3xl">
+                    {productToReview.image}
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-sm text-foreground">{productToReview.name}</p>
+                    <p className="text-xs text-muted-foreground">{productToReview.brand}</p>
+                  </div>
                 </div>
+
+                {/* Star Rating */}
+                <div className="text-center">
+                  <label className="text-sm font-medium text-foreground mb-3 block">
+                    Your Rating
+                  </label>
+                  <div className="flex gap-2 justify-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        className="p-1 transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-9 h-9 ${
+                            star <= reviewRating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-neutral-300 hover:text-yellow-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Review Text */}
                 <div>
-                  <p className="font-medium text-sm text-foreground">{productToReview.name}</p>
-                  <p className="text-xs text-muted-foreground">{productToReview.brand}</p>
+                  <label className="text-sm font-medium text-foreground mb-2 block text-center">
+                    Your Review (Optional)
+                  </label>
+                  <Textarea
+                    placeholder="Share your experience with this product..."
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    className="min-h-[100px] resize-none rounded-2xl border-muted"
+                  />
                 </div>
-              </div>
 
-              {/* Star Rating */}
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Your Rating
-                </label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setReviewRating(star)}
-                      className="p-1 transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`w-8 h-8 ${
-                          star <= reviewRating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-neutral-300 hover:text-yellow-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
+                {/* Submit Button */}
+                <Button
+                  onClick={handleSubmitReview}
+                  className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-full font-semibold"
+                >
+                  Submit Review
+                </Button>
               </div>
-
-              {/* Review Text */}
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Your Review (Optional)
-                </label>
-                <Textarea
-                  placeholder="Share your experience with this product..."
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  className="min-h-[100px] resize-none"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                onClick={handleSubmitReview}
-                className="w-full bg-foreground text-background hover:bg-foreground/90"
-              >
-                Submit Review
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -23,18 +23,20 @@ const ROTATING_TEXTS = [
   "Follow all your favourite brands at one place",
 ];
 
-// Spread images across screen - avoiding center CTA area (30-70% horizontal, 70-90% vertical)
+// Mobile-optimized floating positions - spread along left and right edges only
 const FLOATING_PRODUCTS = [
-  { img: tshirtImg, top: 3, left: 5, delay: 0 },
-  { img: shoesImg, top: 8, right: 8, delay: 0.5 },
-  { img: sareeImg, top: 18, left: 2, delay: 1 },
-  { img: proteinImg, top: 25, right: 3, delay: 1.5 },
-  { img: necklaceImg, top: 35, left: 8, delay: 0.3 },
-  { img: lipstickImg, top: 42, right: 5, delay: 0.8 },
-  { img: joggerImg, top: 52, left: 3, delay: 1.2 },
-  { img: cremeImg, top: 58, right: 2, delay: 0.6 },
-  { img: boxImg, top: 12, left: 85, delay: 1.8 },
-  { img: dressImg, top: 48, right: 88, delay: 0.9 },
+  // Left side - top to bottom
+  { img: tshirtImg, top: 5, left: 2, delay: 0 },
+  { img: sareeImg, top: 22, left: 4, delay: 0.8 },
+  { img: necklaceImg, top: 40, left: 2, delay: 0.3 },
+  { img: joggerImg, top: 58, left: 5, delay: 1.2 },
+  { img: boxImg, top: 75, left: 3, delay: 1.6 },
+  // Right side - top to bottom
+  { img: shoesImg, top: 8, right: 2, delay: 0.5 },
+  { img: proteinImg, top: 28, right: 4, delay: 1.0 },
+  { img: lipstickImg, top: 48, right: 2, delay: 0.6 },
+  { img: cremeImg, top: 65, right: 5, delay: 1.4 },
+  { img: dressImg, top: 82, right: 3, delay: 0.9 },
 ];
 
 const Login = () => {
