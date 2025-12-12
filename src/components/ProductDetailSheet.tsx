@@ -39,7 +39,7 @@ interface ProductDetailProps {
     variantId?: string;
     shopifyData?: any;
   } | null;
-  brand: any;
+  brand?: any;
   onToggleWishlist?: (product: any) => void;
 }
 
