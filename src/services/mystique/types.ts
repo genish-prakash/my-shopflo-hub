@@ -49,6 +49,17 @@ export interface MarketingPreferences {
   rcs_enabled: boolean;
 }
 
+export interface ShippingPreferences {
+  default_address_type?: "HOME" | "OFFICE";
+  preferred_delivery_time?: "MORNING" | "AFTERNOON" | "EVENING";
+}
+
+export interface HairPreferences {
+  hair_type?: "STRAIGHT" | "WAVY" | "CURLY" | "COILY";
+  scalp_type?: "OILY" | "DRY" | "NORMAL" | "SENSITIVE";
+  hair_texture?: "FINE" | "MEDIUM" | "THICK";
+}
+
 export interface Profile {
   id: string;
   user_id: string;
@@ -61,6 +72,8 @@ export interface Profile {
   profile_image_url?: string;
   sizing_preferences?: SizingPreferences;
   skincare_preferences?: SkincarePreferences;
+  hair_preferences?: HairPreferences;
+  shipping_preferences?: ShippingPreferences;
   marketing_preferences?: MarketingPreferences;
   is_active?: boolean;
   created_at: number;
@@ -77,6 +90,8 @@ export interface CreateProfileRequest {
   profile_image_url?: string;
   sizing_preferences?: SizingPreferences;
   skincare_preferences?: SkincarePreferences;
+  hair_preferences?: HairPreferences;
+  shipping_preferences?: ShippingPreferences;
   marketing_preferences?: MarketingPreferences;
 }
 
@@ -89,6 +104,8 @@ export interface UpdateProfileRequest {
   profile_image_url?: string;
   sizing_preferences?: SizingPreferences;
   skincare_preferences?: SkincarePreferences;
+  hair_preferences?: HairPreferences;
+  shipping_preferences?: ShippingPreferences;
   marketing_preferences?: MarketingPreferences;
 }
 
@@ -226,6 +243,12 @@ export interface DiscoverBrand {
   is_sponsored: boolean;
   follower_count: number;
   products: DiscoverProduct[];
+  website?: string;
+  shop_domain?: string;
+  shopData?: {
+    domain?: string;
+  };
+  is_wishlisted: boolean;
 }
 
 export interface DiscoverResponse {
@@ -235,4 +258,36 @@ export interface DiscoverResponse {
   current_page: number;
   total_pages: number;
   has_more: boolean;
+}
+export interface Coupon {
+  coupon_id: string;
+  merchant_id: string;
+  code: string;
+  description: string;
+  long_description: string[];
+  header: string;
+  title: string;
+  start_date: number;
+  end_date: number;
+  concession_amount: number;
+  maximum_concession_amount: number;
+  coupon_type: string;
+  amount_type: string;
+  prerequisite_subtotal_range?: {
+    greater_than_or_equal_to: number;
+  };
+  tags: string[];
+  weight: number;
+  created_at: number;
+  is_active: boolean;
+  is_auto_applicable: boolean;
+}
+
+export interface DiscoverCouponsResponse {
+  success: boolean;
+  data: Coupon[];
+  current_page: number;
+  page_size: number;
+  max_pages: number;
+  total_count: number;
 }

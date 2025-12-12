@@ -365,6 +365,7 @@ const BrandDetail = () => {
           toggleWishlist(id);
           setSelectedProduct(null);
         }}
+        brand={brand}
       />
     </div>
   );
