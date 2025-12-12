@@ -187,8 +187,13 @@ const ProductDetailSheet = ({
   };
 
   const handleVisitBrand = () => {
-    if (product.brand.website) {
-      window.open(product.brand.website, "_blank");
+    if (brand.shop_domain) {
+
+      const handle = product!.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "");
+      window.open(`https://${brand.shop_domain}/products/${handle}`, "_blank");
     }
   };
 

@@ -17,7 +17,7 @@ type FilterType = "all" | "following" | "wishlisted";
 const BrandsView = () => {
   const navigate = useNavigate();
   const [brands, setBrands] = useState<DiscoverBrand[]>([]);
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]); // Keep for toggle logic if needed, or refactor
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [followedBrands, setFollowedBrands] = useState<FollowedBrand[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -65,13 +65,8 @@ const BrandsView = () => {
     fetchBrands();
   }, [page]);
 
-  // Wishlist fetching moved to WishlistView, but we might need to know wishlist state for the heart icon on brands
-  // For now, we'll fetch it here too if we want to sync, or just rely on local toggle updates.
-  // To keep it simple and avoid double fetching, let's remove the fetch here if it's only for the view.
-  // However, toggleWishlist uses wishlistItems to check existence.
   useEffect(() => {
     const fetchWishlist = async () => {
-      // We fetch this to know what is wishlisted for the toggle logic
       try {
         const items = await wishlistApi.getAllWishlist();
         setWishlistItems(items);
@@ -80,7 +75,7 @@ const BrandsView = () => {
       }
     };
     fetchWishlist();
-  }, []); // Fetch once on mount to populate state
+  }, []);
 
   useEffect(() => {
     const fetchFollowed = async () => {
@@ -142,55 +137,72 @@ const BrandsView = () => {
 
     if (!brand || !product) return;
 
-    try {
-      // We need a variant ID, but DiscoverProduct doesn't have it.
-      // We'll use product ID as variant ID for now or a placeholder
-      const variantId = product.id;
+    // Check if item is already in wishlistItems to determine action
+    const existingItem = wishlistItems.find(
+      (item) => item.product_id === product.id
+    );
 
-      // Check if item is already in wishlistItems to determine action
-      const existingItem = wishlistItems.find(
-        (item) => item.product_id === product.id
+    // Optimistic Update
+    if (existingItem) {
+      setWishlistItems((prev) =>
+        prev.filter((item) => item.product_id !== product.id)
       );
+    } else {
+      const optimisticItem: WishlistItem = {
+        id: `temp-${Date.now()}`,
+        user_id: "user", // Placeholder
+        merchant_id: brand.merchant_id,
+        product_id: product.id,
+        variant_id: product.id,
+        product_title: product.name,
+        variant_title: "Default",
+        product_image_url: product.image || "",
+        price: product.price,
+        compare_at_price: product.original_price || undefined,
+        currency: "INR",
+        created_at: Date.now(),
+        is_active: true,
+      };
+      setWishlistItems((prev) => [...prev, optimisticItem]);
+    }
 
+    try {
       if (existingItem) {
         await wishlistApi.removeFromWishlist(
           existingItem.merchant_id,
           existingItem.variant_id
         );
-        setWishlistItems((prev) =>
-          prev.filter((item) => item.product_id !== product.id)
-        );
       } else {
         await wishlistApi.addToWishlist({
           merchant_id: brand.merchant_id,
           product_id: product.id,
-          variant_id: variantId,
+          variant_id: product.id,
           product_title: product.name,
-          variant_title: "Default", // Placeholder
+          variant_title: "Default",
           product_image_url: product.image || "",
           price: product.price,
           compare_at_price: product.original_price || undefined,
           currency: "INR",
         });
-        // Refresh wishlist to get the new item with correct ID
-        // We update local state to reflect change immediately for other toggles
-        const newItem = await wishlistApi.getAllWishlist(); // Or just add optimistic
-        setWishlistItems(newItem);
       }
     } catch (error) {
       console.error("Failed to toggle wishlist", error);
+      // Revert optimistic update
+      if (existingItem) {
+        setWishlistItems((prev) => [...prev, existingItem]);
+      } else {
+        setWishlistItems((prev) =>
+          prev.filter((item) => item.product_id !== product.id)
+        );
+      }
     }
   };
 
   const getFilteredContent = () => {
     if (activeFilter === "following") {
-      // Return empty array here as we handle rendering separately for followed brands
       return [];
     }
     if (activeFilter === "wishlisted") {
-      // Since we don't have wishlist status in the DiscoverProduct type yet,
-      // we'll just return empty or implement when available.
-      // For now returning empty to avoid errors
       return [];
     }
     return brands;
@@ -212,10 +224,12 @@ const BrandsView = () => {
       price: product.price,
       originalPrice: product.original_price,
       images: [product.image],
-      brand: brand, // Pass the full brand object to ensure we have merchant_id and other details
+      brand: brand,
       description: `Premium ${product.name} from ${brand.name}.`,
-      variants: [], // Not available in API
-      isWishlisted: false, // Not available in API
+      variants: [],
+      isWishlisted: wishlistItems.some(
+        (item) => item.product_id === product.id
+      ),
     });
   };
 
@@ -290,14 +304,12 @@ const BrandsView = () => {
                     className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-full h-8 text-xs"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Optimistic update
                       setFollowedBrands((prev) =>
                         prev.filter((b) => b.id !== brand.id)
                       );
                       brandFollowApi
                         .unfollowBrand(brand.merchant_id)
                         .catch(() => {
-                          // Revert if failed
                           setFollowedBrands((prev) => [...prev, brand]);
                         });
                     }}
@@ -335,7 +347,7 @@ const BrandsView = () => {
                   ref={isLastElement ? lastBrandElementRef : null}
                   className="rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-[1.01]"
                   style={{
-                    background: `linear-gradient(135deg, ${brand.color}12 0%, ${brand.color}06 100%)`,
+                    background: `linear-gradient(135deg, ${brand.color}100 0%, ${brand.color}100 100%)`,
                   }}
                   onClick={() => navigateToBrand(brand.merchant_id)}
                 >
@@ -380,53 +392,62 @@ const BrandsView = () => {
                   {/* Products Grid - 2x2 - No product names */}
                   <div className="px-4 pb-2">
                     <div className="grid grid-cols-2 gap-3">
-                      {brand.products.slice(0, 4).map((product) => (
-                        <div
-                          key={product.id}
-                          className="relative bg-white/90 backdrop-blur-sm rounded-xl p-3 aspect-square flex flex-col"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openProductDetail(brand, product);
-                          }}
-                        >
-                          {/* Price - Top Left */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm font-semibold text-foreground">
-                              ₹{product.price.toLocaleString()}
-                            </span>
-                            {product.original_price && (
-                              <span className="text-xs text-muted-foreground line-through">
-                                ₹{product.original_price.toLocaleString()}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Product Icon */}
-                          <div className="flex-1 flex items-center justify-center overflow-hidden my-2">
-                            {product.image ? (
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="h-full w-full object-contain"
-                              />
-                            ) : (
-                              <span className="text-4xl">🛍️</span>
-                            )}
-                          </div>
-
-                          {/* Wishlist - Bottom Right */}
-                          <button
-                            onClick={(e) =>
-                              toggleWishlist(e, brand.id, product.id)
-                            }
-                            className="absolute bottom-3 right-3 p-1"
+                      {brand.products.slice(0, 4).map((product) => {
+                        const isWishlisted = wishlistItems.some(
+                          (item) => item.product_id === product.id
+                        );
+                        return (
+                          <div
+                            key={product.id}
+                            className="relative bg-white/90 backdrop-blur-sm rounded-xl p-3 aspect-square flex flex-col"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openProductDetail(brand, product);
+                            }}
                           >
-                            <Heart
-                              className={`w-5 h-5 transition-all text-muted-foreground hover:text-red-400`}
-                            />
-                          </button>
-                        </div>
-                      ))}
+                            {/* Price - Top Left */}
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm font-semibold text-foreground">
+                                ₹{product.price.toLocaleString()}
+                              </span>
+                              {product.original_price && (
+                                <span className="text-xs text-muted-foreground line-through">
+                                  ₹{product.original_price.toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Product Icon */}
+                            <div className="flex-1 flex items-center justify-center overflow-hidden my-2">
+                              {product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="h-full w-full object-contain"
+                                />
+                              ) : (
+                                <span className="text-4xl">🛍️</span>
+                              )}
+                            </div>
+
+                            {/* Wishlist - Bottom Right */}
+                            <button
+                              onClick={(e) =>
+                                toggleWishlist(e, brand.id, product.id)
+                              }
+                              className="absolute bottom-3 right-3 p-1"
+                            >
+                              <Heart
+                                className={`w-5 h-5 transition-all ${
+                                  isWishlisted
+                                    ? "fill-red-500 text-red-500"
+                                    : "text-muted-foreground hover:text-red-400"
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -466,9 +487,20 @@ const BrandsView = () => {
         onClose={() => setSelectedProduct(null)}
         product={selectedProduct}
         brand={selectedProduct?.brand}
-        onToggleWishlist={(id) => {
-          // TODO: Implement wishlist toggle
-          console.log("Toggle wishlist from sheet", id);
+        onToggleWishlist={(product) => {
+          // Pass the product to toggleWishlist
+          if (selectedProduct && selectedProduct.brand) {
+            toggleWishlist(
+              { stopPropagation: () => {} } as any,
+              selectedProduct.brand.id,
+              product.id
+            );
+            // Update local state for sheet
+            setSelectedProduct((prev: any) => ({
+              ...prev,
+              isWishlisted: !prev.isWishlisted,
+            }));
+          }
         }}
       />
     </div>
