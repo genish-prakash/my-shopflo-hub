@@ -1,7 +1,7 @@
 import { authenticatedApi } from "../authenticatedApi";
 import { DiscoverCouponsResponse } from "./types";
 
-const BASE_PATH = "/mystique/api/v1/coupons/discover";
+const BASE_PATH = "/coupons/discover";
 
 export const couponsApi = {
   getDiscoverCoupons: async (

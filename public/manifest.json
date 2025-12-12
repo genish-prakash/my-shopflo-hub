@@ -1,0 +1,38 @@
+{
+    "name": "Shopflo Hub - Shopping & Deals",
+    "short_name": "Shopflo",
+    "description": "Discover amazing deals and shop from your favorite brands with exclusive offers and instant notifications",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "orientation": "portrait-primary",
+    "dir": "ltr",
+    "lang": "en",
+    "categories": [
+        "shopping",
+        "lifestyle",
+        "business"
+    ],
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "48x48",
+            "type": "image/x-icon",
+            "purpose": "any"
+        },
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

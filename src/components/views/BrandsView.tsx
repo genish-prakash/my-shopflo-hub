@@ -229,7 +229,8 @@ const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
       originalPrice: product.original_price,
       images: [product.image],
       brand: brand,
-      description: `Premium ${product.name} from ${brand.name}.`,
+      description:
+        product.description || `Premium ${product.name} from ${brand.name}.`,
       variants: [],
       isWishlisted: wishlistItems.some(
         (item) => item.product_id === product.id
@@ -349,16 +350,23 @@ const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
                 <div
                   key={brand.id}
                   ref={isLastElement ? lastBrandElementRef : null}
-                  className="rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-[1.01]"
+                  className="rounded-3xl overflow-hidden shadow-xl cursor-pointer transition-all hover:scale-[1.01] border border-white/20 relative"
                   style={{
-                    background: `linear-gradient(135deg, ${brand.color}100 0%, ${brand.color}100 100%)`,
+                    background: `linear-gradient(145deg, ${brand.color}15 0%, ${brand.color}05 100%)`,
+                    backdropFilter: "blur(20px)",
                   }}
                   onClick={() => navigateToBrand(brand.merchant_id)}
                 >
+                  {/* Decorative Background Blob */}
+                  <div
+                    className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"
+                    style={{ backgroundColor: brand.color }}
+                  />
+
                   {/* Header with Logo and Follow */}
-                  <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg overflow-hidden bg-white">
+                  <div className="flex items-center justify-between p-5 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-sm p-1">
                         <img
                           src={brand.logo}
                           alt={brand.name}
@@ -368,17 +376,17 @@ const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
                           }}
                         />
                       </div>
-                      <h2 className="text-lg font-bold text-foreground">
+                      <h2 className="text-xl font-bold text-foreground tracking-tight">
                         {brand.name}
                       </h2>
                     </div>
                     <Button
                       variant={brand.is_followed ? "default" : "outline"}
                       size="sm"
-                      className={`rounded-full px-4 h-8 text-xs font-medium ${
+                      className={`rounded-full px-5 h-9 text-xs font-semibold transition-all ${
                         brand.is_followed
-                          ? "bg-foreground text-background hover:bg-foreground/90"
-                          : "border-foreground/30 hover:bg-foreground/10"
+                          ? "bg-foreground text-background shadow-md hover:bg-foreground/90"
+                          : "bg-white/50 border-foreground/10 hover:bg-white hover:border-foreground/20 backdrop-blur-sm"
                       }`}
                       onClick={(e) => toggleFollow(e, brand.id)}
                     >
@@ -386,15 +394,15 @@ const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
                         <>Following</>
                       ) : (
                         <>
-                          <Plus className="w-3 h-3 mr-1" />
+                          <Plus className="w-3.5 h-3.5 mr-1.5" />
                           Follow
                         </>
                       )}
                     </Button>
                   </div>
 
-                  {/* Products Grid - 2x2 - No product names */}
-                  <div className="px-4 pb-2">
+                  {/* Products Grid - 2x2 */}
+                  <div className="px-5 pb-3 relative z-10">
                     <div className="grid grid-cols-2 gap-3">
                       {brand.products.slice(0, 4).map((product) => {
                         const isWishlisted = wishlistItems.some(
@@ -403,62 +411,64 @@ const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
                         return (
                           <div
                             key={product.id}
-                            className="relative bg-white/90 backdrop-blur-sm rounded-xl p-3 aspect-square flex flex-col"
+                            className="group relative bg-white rounded-2xl aspect-[3/4] flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent hover:border-opacity-20"
+                            style={{
+                              borderColor: `${brand.color}30`,
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               openProductDetail(brand, product);
                             }}
                           >
-                            {/* Price - Top Left */}
-                            <div className="flex items-center gap-1">
-                              <span className="text-sm font-semibold text-foreground">
-                                ₹{product.price.toLocaleString()}
-                              </span>
-                              {product.original_price && (
-                                <span className="text-xs text-muted-foreground line-through">
-                                  ₹{product.original_price.toLocaleString()}
+                            {/* Image Container */}
+                            <div className="relative flex-1 w-full rounded-xl overflow-hidden bg-gray-50/50">
+                              <div className="relative w-full h-full rounded-lg overflow-hidden shadow-inner">
+                                {product.image ? (
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                  />
+                                ) : (
+                                  <div className="h-full w-full flex items-center justify-center text-4xl">
+                                    🛍️
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Price Badge - Top Left */}
+                              <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm flex items-baseline gap-1 border border-black/5 z-10">
+                                <span className="text-xs font-bold text-foreground">
+                                  ₹{product.price.toLocaleString()}
                                 </span>
-                              )}
-                            </div>
+                              </div>
 
-                            {/* Product Icon */}
-                            <div className="flex-1 flex items-center justify-center overflow-hidden my-2">
-                              {product.image ? (
-                                <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="h-full w-full object-contain"
+                              {/* Wishlist Button - Top Right */}
+                              <button
+                                onClick={(e) =>
+                                  toggleWishlist(e, brand.id, product.id)
+                                }
+                                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center shadow-sm transition-transform active:scale-90 border border-black/5 hover:bg-red-50 z-10"
+                              >
+                                <Heart
+                                  className={`w-4 h-4 transition-colors ${
+                                    isWishlisted
+                                      ? "fill-red-500 text-red-500"
+                                      : "text-gray-400 hover:text-red-500"
+                                  }`}
                                 />
-                              ) : (
-                                <span className="text-4xl">🛍️</span>
-                              )}
+                              </button>
                             </div>
-
-                            {/* Wishlist - Bottom Right */}
-                            <button
-                              onClick={(e) =>
-                                toggleWishlist(e, brand.id, product.id)
-                              }
-                              className="absolute bottom-3 right-3 p-1"
-                            >
-                              <Heart
-                                className={`w-5 h-5 transition-all ${
-                                  isWishlisted
-                                    ? "fill-red-500 text-red-500"
-                                    : "text-muted-foreground hover:text-red-400"
-                                }`}
-                              />
-                            </button>
                           </div>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Shop All CTA - Blurred */}
-                  <div className="p-4 pt-2">
+                  {/* Shop All CTA */}
+                  <div className="p-5 pt-2 relative z-10">
                     <Button
-                      className="w-full rounded-full h-10 font-medium text-sm backdrop-blur-md border border-white/30"
+                      className="w-full rounded-2xl h-11 font-semibold text-sm shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
                       style={{
                         backgroundColor: `${brand.color}`,
                         color: "white",
@@ -468,7 +478,7 @@ const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
                         navigateToBrand(brand.merchant_id);
                       }}
                     >
-                      Shop All
+                      Shop All Collection
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>

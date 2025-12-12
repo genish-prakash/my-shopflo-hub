@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import { wishlistApi } from "@/services/mystique";
 import type { WishlistItem } from "@/services/mystique/types";
 
@@ -45,45 +45,80 @@ const WishlistView = () => {
 
   if (wishlistItems.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        No wishlisted products yet
+      <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+        <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center">
+          <Heart className="w-8 h-8 text-muted-foreground/50" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-lg font-medium text-foreground">
+            Your wishlist is empty
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Save items you love to buy them later
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-4">
       {wishlistItems.map((item) => (
         <div
           key={item.id}
-          className="relative bg-card rounded-2xl p-3 shadow-sm cursor-pointer transition-transform hover:scale-[1.02]"
+          className="group relative bg-white rounded-2xl p-2 aspect-[3/4] flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent hover:border-black/5"
           onClick={() => {
             console.log("Open wishlist item", item);
           }}
         >
-          <span className="text-xs font-semibold text-foreground">
-            ₹{item.price.toLocaleString()}
-          </span>
-          <div className="flex items-center justify-center text-4xl py-6 overflow-hidden">
-            {item.product_image_url ? (
-              <img
-                src={item.product_image_url}
-                alt={item.product_title}
-                className="h-20 w-full object-contain"
-              />
-            ) : (
-              <span>🛍️</span>
-            )}
+          {/* Image Container */}
+          <div className="relative flex-1 w-full rounded-xl overflow-hidden bg-gray-50/50 p-2">
+            <div className="relative w-full h-full rounded-lg overflow-hidden shadow-inner">
+              {item.product_image_url ? (
+                <img
+                  src={item.product_image_url}
+                  alt={item.product_title}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-4xl text-muted-foreground/20">
+                  <ShoppingBag className="w-12 h-12" />
+                </div>
+              )}
+            </div>
+
+            {/* Price Badge - Top Left */}
+            <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm flex items-baseline gap-1 border border-black/5 z-10">
+              <span className="text-xs font-bold text-foreground">
+                ₹{item.price.toLocaleString()}
+              </span>
+              {item.compare_at_price && (
+                <span className="text-[10px] text-muted-foreground line-through">
+                  ₹{item.compare_at_price.toLocaleString()}
+                </span>
+              )}
+            </div>
+
+            {/* Remove Button - Top Right */}
+            <button
+              onClick={(e) => removeFromWishlist(e, item)}
+              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center shadow-sm transition-transform active:scale-90 border border-black/5 hover:bg-red-50 z-10 group/btn"
+            >
+              <Heart className="w-4 h-4 fill-red-500 text-red-500 transition-transform group-hover/btn:scale-110" />
+            </button>
           </div>
-          <p className="text-[10px] text-muted-foreground/70 truncate">
-            {item.product_title}
-          </p>
-          <button
-            onClick={(e) => removeFromWishlist(e, item)}
-            className="absolute bottom-3 right-3 p-1"
-          >
-            <Heart className="w-5 h-5 fill-red-500 text-red-500" />
-          </button>
+
+          {/* Product Title */}
+          <div className="px-1 pt-3 pb-1">
+            <h3 className="text-sm font-medium text-foreground truncate leading-tight">
+              {item.product_title}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {item.variant_title !== "Default"
+                ? item.variant_title
+                : "Standard"}
+            </p>
+          </div>
         </div>
       ))}
     </div>

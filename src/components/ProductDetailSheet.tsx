@@ -97,9 +97,8 @@ const ProductDetailSheet = ({
           console.error("Invalid website URL", website);
         }
 
-        // 2. Derive handle from product name
-        // We use the name to generate the handle as description is used for other things in our app
-        const handle = product!.name
+        // 2. Derive handle from product description (which contains the handle)
+        const handle = product!.description
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)+/g, "");
@@ -171,9 +170,9 @@ const ProductDetailSheet = ({
   const shopDomain = getDomain();
 
   const images = Array.isArray(displayProduct.images)
-    ? displayProduct.images.map((img: string) => {
-        if (img.startsWith("http")) return img;
-        if (img.startsWith("//")) return `https:${img}`;
+    ? displayProduct.images?.map((img: string) => {
+        if (img?.startsWith("http")) return img;
+        if (img?.startsWith("//")) return `https:${img}`;
         return `https://${shopDomain}${img}`;
       })
     : [displayProduct.images].filter(Boolean);
@@ -188,11 +187,10 @@ const ProductDetailSheet = ({
 
   const handleVisitBrand = () => {
     if (brand.shop_domain) {
-
-      const handle = product!.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)+/g, "");
+      const handle = product!.description
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
       window.open(`https://${brand.shop_domain}/products/${handle}`, "_blank");
     }
   };

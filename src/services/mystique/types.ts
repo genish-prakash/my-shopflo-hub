@@ -229,6 +229,7 @@ export interface DiscoverProduct {
   is_on_sale: boolean;
   created_at?: number;
   sales_count?: number | null;
+  description?: string;
 }
 
 export interface DiscoverBrand {
