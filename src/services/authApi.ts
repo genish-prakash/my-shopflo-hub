@@ -3,8 +3,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const API_BASE_URL =
-  import.meta.env.VITE_HEIMDALL_API_BASE_URL ||
-  "https://morally-closing-dragon.ngrok-free.app/heimdall/api/v1";
+  import.meta.env.VITE_MYSTIQUE_API_BASE_URL ||
+  "https://morally-closing-dragon.ngrok-free.app/mystique/api/v1";
 const MERCHANT_ID = "081418d4-1d30-4e25-bfc0-851fb6df5e13";
 
 // Cookie keys

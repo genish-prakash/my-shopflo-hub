@@ -139,7 +139,7 @@ const ReviewsView = () => {
       const response = await authenticatedApi.get<{
         success: boolean;
         data: ApiReview[];
-      }>(`/mystique/api/v1/reviews/order/${orderId}`);
+      }>(`/reviews/order/${orderId}`);
 
       if (response.success && response.data) {
         setOrderReviews(response.data);
@@ -200,7 +200,7 @@ const ReviewsView = () => {
           images: [],
         };
 
-        await authenticatedApi.post("/mystique/api/v1/reviews", reviewData);
+        await authenticatedApi.post("/reviews", reviewData);
 
         // Update local state
         const productKey = `${reviewingProduct.product_id}_${reviewingProduct.variant_id}`;
