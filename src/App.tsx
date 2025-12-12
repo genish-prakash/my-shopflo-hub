@@ -14,6 +14,7 @@ import ShoppingPreferences from "./pages/ShoppingPreferences";
 import BrandDetail from "./pages/BrandDetail";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
+import Install from "./pages/Install";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -103,6 +104,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route path="/install" element={<Install />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
