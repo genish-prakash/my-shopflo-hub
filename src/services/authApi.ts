@@ -5,6 +5,9 @@ import Cookies from "js-cookie";
 const API_BASE_URL =
   import.meta.env.VITE_MYSTIQUE_API_BASE_URL ||
   "https://morally-closing-dragon.ngrok-free.app/mystique/api/v1";
+const HEIMDALL_API_BASE_URL =
+  import.meta.env.VITE_HEIMDALL_API_BASE_URL ||
+  "https://api.shopflo.co/heimdall/api/v1";
 const MERCHANT_ID = "081418d4-1d30-4e25-bfc0-851fb6df5e13";
 
 // Cookie keys
@@ -111,6 +114,22 @@ export interface UpdateProfileRequest {
   };
 }
 
+export interface RefreshTokenRequest {
+  refresh_token: string;
+  merchant_id: string;
+}
+
+export interface RefreshTokenResponse {
+  success: boolean;
+  data: {
+    access_token: string;
+    token_type: string;
+    access_token_expires_at: number;
+    refresh_token: string;
+    refresh_token_expires_at: number;
+  };
+}
+
 const authApiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -140,9 +159,9 @@ export const shopfloAuthApi = {
 
     console.log("Sending OTP with payload:", payload);
 
-    // Use production Shopflo URL specifically for /otp/send endpoint
+    // Use Heimdall API for /otp/send endpoint
     const response = await axios.post<SendOtpResponse>(
-      "https://api.shopflo.co/heimdall/api/v1/otp/send",
+      `${HEIMDALL_API_BASE_URL}/otp/send`,
       payload,
       {
         headers: {
@@ -165,9 +184,9 @@ export const shopfloAuthApi = {
       bureau_event_id: "",
     };
 
-    // Use production Shopflo URL specifically for /otp/verify endpoint
+    // Use Heimdall API for /otp/verify endpoint
     const response = await axios.post<VerifyOtpResponse>(
-      "https://api.shopflo.co/heimdall/api/v1/otp/verify",
+      `${HEIMDALL_API_BASE_URL}/otp/verify`,
       payload,
       {
         headers: {
@@ -203,9 +222,9 @@ export const shopfloAuthApi = {
   },
 
   getUserData: async (accessToken: string): Promise<UserData> => {
-    // Use production Shopflo URL specifically for /me endpoint
+    // Use Heimdall API for /authenticate/me endpoint
     const response = await axios.get<{ success: boolean; data: UserData }>(
-      "https://api.shopflo.co/heimdall/api/v1/authenticate/me",
+      `${HEIMDALL_API_BASE_URL}/authenticate/me`,
       {
         params: {
           required_identifiers: true,
@@ -241,5 +260,31 @@ export const shopfloAuthApi = {
         authorization: accessToken,
       },
     });
+  },
+
+  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    const payload: RefreshTokenRequest = {
+      refresh_token: refreshToken,
+      merchant_id: MERCHANT_ID,
+    };
+
+    try {
+      // Use Heimdall API for token refresh endpoint
+      const response = await axios.post<RefreshTokenResponse>(
+        `${HEIMDALL_API_BASE_URL}/token/refresh`,
+        payload,
+        {
+          headers: {
+            accept: "application/json, text/plain, */*",
+            "content-type": "application/json",
+            "x-shopflo-version": "latest",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Failed to refresh token:", error);
+      throw error;
+    }
   },
 };

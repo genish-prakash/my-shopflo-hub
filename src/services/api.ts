@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import Cookies from 'js-cookie';
+import { setupRefreshTokenInterceptor } from '@/lib/refreshTokenInterceptor';
 
 export interface ApiConfig {
   baseURL: string;
@@ -33,6 +34,7 @@ class ApiClient {
   }
 
   private setupInterceptors(): void {
+    // Request interceptor for adding auth token
     this.instance.interceptors.request.use(
       (config) => {
         const token = this.getAuthToken();
@@ -46,6 +48,10 @@ class ApiClient {
       }
     );
 
+    // Setup refresh token interceptor for automatic token refresh on 401/403
+    setupRefreshTokenInterceptor(this.instance);
+
+    // Additional response interceptor for error handling
     this.instance.interceptors.response.use(
       (response) => response,
       (error) => {

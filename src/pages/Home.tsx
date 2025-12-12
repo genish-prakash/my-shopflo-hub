@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import OrdersView from "@/components/views/OrdersView";
@@ -10,10 +11,30 @@ import AddressesView from "@/components/views/AddressesView";
 import { useUser } from "@/contexts/UserContext";
 
 export type ViewType = "orders" | "reviews" | "brands" | "offers" | "profile" | "addresses";
+export type BrandsSubTab = "all" | "following" | "wishlisted";
 
 const Home = () => {
+  const [searchParams] = useSearchParams();
   const [currentView, setCurrentView] = useState<ViewType>("brands");
+  const [brandsSubTab, setBrandsSubTab] = useState<BrandsSubTab>("all");
   const { user, isLoading, error } = useUser();
+
+  // Handle URL query parameter for tab selection
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const subTabParam = searchParams.get("subTab");
+
+    if (tabParam === "order") {
+      setCurrentView("orders");
+    } else if (tabParam === "brands") {
+      setCurrentView("brands");
+      if (subTabParam === "wishlist") {
+        setBrandsSubTab("wishlisted");
+      }
+    } else if (tabParam === "review") {
+      setCurrentView("reviews");
+    }
+  }, [searchParams]);
 
   // Log user data for debugging
   if (user) {
@@ -42,7 +63,7 @@ const Home = () => {
       case "reviews":
         return <ReviewsView />;
       case "brands":
-        return <BrandsView />;
+        return <BrandsView initialFilter={brandsSubTab} />;
       case "offers":
         return <OffersView />;
       case "profile":
@@ -50,7 +71,7 @@ const Home = () => {
       case "addresses":
         return <AddressesView />;
       default:
-        return <BrandsView />;
+        return <BrandsView initialFilter={brandsSubTab} />;
     }
   };
 

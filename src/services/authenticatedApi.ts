@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import Cookies from "js-cookie";
+import { setupRefreshTokenInterceptor } from "@/lib/refreshTokenInterceptor";
 
 const API_BASE_URL =
   import.meta.env.VITE_MYSTIQUE_API_BASE_URL ||
@@ -51,20 +52,8 @@ authenticatedApiClient.interceptors.request.use(
   }
 );
 
-// Add response interceptor for error handling
-authenticatedApiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid - redirect to login
-      Cookies.remove("shopflo_access_token");
-      Cookies.remove("shopflo_refresh_token");
-      localStorage.removeItem("isAuthenticated");
-      window.location.href = "/";
-    }
-    return Promise.reject(error);
-  }
-);
+// Setup refresh token interceptor for automatic token refresh on 401/403
+setupRefreshTokenInterceptor(authenticatedApiClient);
 
 // Example API methods using authenticated client
 export const authenticatedApi = {

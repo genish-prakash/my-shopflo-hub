@@ -14,12 +14,16 @@ import type {
 
 type FilterType = "all" | "following" | "wishlisted";
 
-const BrandsView = () => {
+interface BrandsViewProps {
+  initialFilter?: FilterType;
+}
+
+const BrandsView = ({ initialFilter = "all" }: BrandsViewProps) => {
   const navigate = useNavigate();
   const [brands, setBrands] = useState<DiscoverBrand[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [followedBrands, setFollowedBrands] = useState<FollowedBrand[]>([]);
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [activeFilter, setActiveFilter] = useState<FilterType>(initialFilter);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const [page, setPage] = useState(1);
